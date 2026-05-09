@@ -1,0 +1,35 @@
+# Nexus 101 — Supabase project config
+# When you `supabase init`, replace these defaults with your real project values.
+
+project_id = "nexus101"
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+major_version = 15
+
+# ── Phase 2 functions ──
+[functions.paymob-init]
+verify_jwt = true
+
+[functions.paymob-webhook]
+verify_jwt = false   # Public — Paymob can't auth as a user. Security via HMAC inside.
+
+[functions.study-buddy-chat]
+verify_jwt = true
+
+# ── Phase 3 functions ──
+[functions.bunny-signed-url]
+verify_jwt = true
+
+[functions.bunny-webhook]
+verify_jwt = false   # Public — Bunny.net can't auth as a user. Security via webhook secret inside.
+
+[functions.parse-syllabus]
+verify_jwt = true
+
+[functions.build-custom-playlist]
+verify_jwt = true

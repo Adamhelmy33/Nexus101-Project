@@ -1,0 +1,68 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║   Nexus 101 — Netlify deployment config                          ║
+# ║                                                                  ║
+# ║   This file tells Netlify how to build and serve the site.       ║
+# ║   You don't need to edit it for basic deploys — just push your   ║
+# ║   code to GitHub and connect the repo in Netlify.                ║
+# ║                                                                  ║
+# ║   See docs/NETLIFY_DEPLOY.md for the step-by-step guide.         ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+[build]
+  command   = "npm install --legacy-peer-deps && npm run build"
+  publish   = "dist"                       # Vite outputs the production site here
+  functions = "netlify/functions"           # Serverless backend lives here
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS    = "--legacy-peer-deps"      # Needed because @vitejs/plugin-react peer-deps Vite 7 max
+
+# ── Frontend → backend pretty URLs ────────────────────────────────
+# Anything the React app POSTs to /api/<name> gets routed to the
+# matching function in netlify/functions/<name>.js.
+# Frontend code stays vendor-neutral (no Netlify-specific URLs).
+[[redirects]]
+  from   = "/api/*"
+  to     = "/.netlify/functions/:splat"
+  status = 200
+  force  = true
+
+# ── SPA fallback — every other route serves index.html ────────────
+# So React Router (e.g. /store, /dashboard, /custom-course/:id) works
+# even when the user refreshes the page or shares a deep link.
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# ── Security headers (sensible defaults) ──────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options          = "DENY"            # Prevents clickjacking
+    X-Content-Type-Options   = "nosniff"
+    Referrer-Policy          = "strict-origin-when-cross-origin"
+    Permissions-Policy       = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+
+# Cache hashed asset bundles for a year (Vite renames files when content changes,
+# so safe to cache aggressively).
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Don't cache index.html — needs to refresh to get the latest asset hashes
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ── Per-function settings ─────────────────────────────────────────
+# Increase timeout for AI calls (default 10s; AI calls can hit 15-25s).
+[functions."study-buddy"]
+  timeout = 26                                    # max for sync function on Pro plan
+[functions."parse-syllabus"]
+  timeout = 26
+[functions."build-custom-playlist"]
+  timeout = 26

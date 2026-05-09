@@ -1,0 +1,288 @@
+import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import {
+  Linkedin, Twitter, BookOpen, ArrowRight, Star, Award,
+  GraduationCap, Palette, Users,
+} from 'lucide-react'
+import Avatar from '../components/Avatar'
+import { FOUNDERS, TEAM, INSTRUCTORS } from '../data/constants'
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+}
+const stagger = { show: { transition: { staggerChildren: 0.12 } } }
+
+/* ─── Founder card (full) ─────────────────────── */
+function FounderCard({ founder }) {
+  return (
+    <motion.div variants={fadeUp}
+                whileHover={{ y: -4 }}
+                className="rounded-3xl overflow-hidden bg-white shadow-lg border border-gray-100 transition-shadow hover:shadow-2xl">
+      <div className="relative h-64 flex flex-col items-center justify-center p-6 overflow-hidden"
+           style={{ background: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientTo})` }}>
+        <div className="absolute inset-0 opacity-10"
+             style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+        <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/10" />
+
+        <Avatar
+          photo={founder.photo}
+          initials={founder.initials}
+          name={founder.name}
+          gradientFrom="rgba(255,255,255,0.2)"
+          gradientTo="rgba(255,255,255,0.1)"
+          size={140}
+          rounded="rounded-full"
+          className="relative z-10"
+        />
+        <div className="flex items-center gap-1 mt-4 relative z-10">
+          {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />)}
+        </div>
+      </div>
+
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-gray-900 mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
+          {founder.name}
+        </h3>
+        <p className="text-sm font-semibold text-primary mb-1 uppercase tracking-wide">{founder.role}</p>
+        <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+          <GraduationCap className="w-3.5 h-3.5" /> {founder.subject}
+        </p>
+
+        <blockquote className="text-sm text-gray-600 italic leading-relaxed mb-5 p-4 rounded-xl"
+                    style={{ background: '#f8faff', borderLeft: `3px solid ${founder.gradientFrom}` }}>
+          {founder.quote}
+        </blockquote>
+
+        <p className="text-sm text-gray-600 leading-relaxed mb-5">{founder.bio}</p>
+
+        <div className="mb-5">
+          <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <Award className="w-3.5 h-3.5 text-primary" /> Highlights
+          </p>
+          <ul className="space-y-1.5">
+            {founder.achievements.map(a => (
+              <li key={a} className="flex items-start gap-2 text-xs text-gray-500">
+                <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: founder.gradientFrom }} />
+                {a}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mb-6">
+          <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <BookOpen className="w-3.5 h-3.5 text-primary" /> Teaches
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {founder.subjects.map(s => (
+              <span key={s} className="text-xs px-3 py-1 rounded-full font-medium text-white"
+                    style={{ background: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientTo})` }}>
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pt-4" style={{ borderTop: '1px solid #f1f5f9' }}>
+          <a href={founder.linkedin} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/5">
+            <Linkedin className="w-3.5 h-3.5" /> LinkedIn
+          </a>
+          <a href={founder.twitter} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/5">
+            <Twitter className="w-3.5 h-3.5" /> Twitter
+          </a>
+          <Link to="/store" className="ml-auto text-xs font-semibold text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+            See Modules <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+/* ─── Team / designer card ────────────────────── */
+function TeamMemberCard({ member }) {
+  return (
+    <motion.div variants={fadeUp}
+                whileHover={{ y: -4 }}
+                className="rounded-2xl bg-white shadow-md border border-gray-100 p-6 flex flex-col items-center text-center transition-shadow hover:shadow-xl">
+      <Avatar
+        photo={member.photo}
+        initials={member.initials}
+        name={member.name}
+        gradientFrom={member.gradientFrom}
+        gradientTo={member.gradientTo}
+        size={96}
+        rounded="rounded-2xl"
+        className="mb-4"
+      />
+      <h3 className="font-bold text-gray-900 mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
+        {member.name}
+      </h3>
+      <p className="text-xs font-semibold text-primary mb-1 uppercase tracking-wider flex items-center gap-1.5">
+        <Palette className="w-3 h-3" /> {member.role}
+      </p>
+      <p className="text-xs text-gray-400 mb-3">{member.department}</p>
+      <p className="text-sm text-gray-500 leading-relaxed">{member.bio}</p>
+    </motion.div>
+  )
+}
+
+/* ─── Instructor card (full) ──────────────────── */
+function InstructorCard({ ins }) {
+  return (
+    <motion.div variants={fadeUp}
+                whileHover={{ y: -4 }}
+                className="rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden flex flex-col transition-shadow hover:shadow-xl">
+      <div className="relative h-32 flex items-end p-4 overflow-hidden"
+           style={{ background: `linear-gradient(135deg, ${ins.gradientFrom}, ${ins.gradientTo})` }}>
+        <div className="absolute inset-0 opacity-15"
+             style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="flex flex-wrap gap-1 relative z-10">
+          {ins.universities.map(u => (
+            <span key={u} className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md backdrop-blur-sm text-white"
+                  style={{ background: 'rgba(0,0,0,0.25)' }}>
+              {u}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-5 -mt-12 flex flex-col items-center text-center">
+        <Avatar
+          photo={ins.photo}
+          initials={ins.initials}
+          name={ins.name}
+          gradientFrom={ins.gradientFrom}
+          gradientTo={ins.gradientTo}
+          size={88}
+          rounded="rounded-full"
+          className="mb-3"
+        />
+        <h3 className="font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+          {ins.name}
+        </h3>
+        <p className="text-xs font-semibold text-primary uppercase tracking-wider mt-0.5">{ins.role}</p>
+        <p className="text-xs text-gray-400 mb-3">{ins.subject}</p>
+        <p className="text-sm text-gray-600 leading-relaxed mb-4">{ins.bio}</p>
+
+        <div className="flex items-center gap-3 text-xs mt-auto pt-4 border-t border-gray-100 w-full justify-center">
+          <span className="flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+            <span className="font-semibold text-gray-700">{ins.rating}</span>
+          </span>
+          <span className="text-gray-300">·</span>
+          <span className="text-gray-500">
+            <span className="font-semibold text-gray-700">{ins.students.toLocaleString()}</span> students
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+export default function Team() {
+  return (
+    <div>
+      {/* ── Hero ── */}
+      <div className="pt-28 pb-16 text-center relative overflow-hidden"
+           style={{ background: 'linear-gradient(135deg, #0a1628 0%, #003380 60%, #0047AB 100%)' }}>
+        <div className="absolute inset-0 opacity-5"
+             style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        <div className="relative max-w-3xl mx-auto px-4">
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                    className="text-primary-light font-semibold text-sm uppercase tracking-widest mb-4">
+            The People
+          </motion.p>
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                     className="text-4xl sm:text-5xl font-bold text-white mb-4"
+                     style={{ fontFamily: 'Playfair Display, serif' }}>
+            Meet the Team
+          </motion.h1>
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                    className="text-white/65 text-lg">
+            Two founders, six instructors, one mission — your university success.
+          </motion.p>
+        </div>
+        <svg className="absolute bottom-0 left-0 right-0" viewBox="0 0 1440 50" fill="none">
+          <path d="M0 50L1440 50L1440 20C1200 45 960 55 720 40C480 25 240 10 0 30V50Z" fill="white" />
+        </svg>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+        {/* ── Founders ── */}
+        <section className="mb-20">
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                      className="text-center mb-12">
+            <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Founders</p>
+            <h2 className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+              The two who started Nexus 101
+            </h2>
+          </motion.div>
+
+          <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {FOUNDERS.map(f => <FounderCard key={f.id} founder={f} />)}
+          </motion.div>
+        </section>
+
+        {/* ── Instructors (6) ── */}
+        <section className="mb-20">
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                      className="text-center mb-12">
+            <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
+              <Users className="w-4 h-4" /> Instructors
+            </p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Six experts. One goal.
+            </h2>
+            <p className="text-gray-500 max-w-xl mx-auto">
+              Each instructor specialises in a slice of the curriculum — and they all want one thing: high marks for you.
+            </p>
+          </motion.div>
+
+          <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {INSTRUCTORS.map(ins => <InstructorCard key={ins.id} ins={ins} />)}
+          </motion.div>
+        </section>
+
+        {/* ── Wider team / designer ── */}
+        <section className="mb-20">
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                      className="text-center mb-10">
+            <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Wider Team</p>
+            <h2 className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+              The talent behind the brand
+            </h2>
+          </motion.div>
+
+          <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {TEAM.map(member => <TeamMemberCard key={member.id} member={member} />)}
+          </motion.div>
+        </section>
+
+        {/* ── Mission strip ── */}
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                    className="rounded-3xl p-10 text-center relative overflow-hidden"
+                    style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}>
+          <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/5" />
+          <div className="relative">
+            <h2 className="text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Our Mission
+            </h2>
+            <p className="text-white/75 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
+              To make high-intensity, world-class university revisions accessible to every Egyptian student —
+              no matter which university they attend.
+            </p>
+            <Link to="/store" className="btn-accent">
+              Explore Modules <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  )
+}
