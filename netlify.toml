@@ -9,11 +9,12 @@
 # ╚══════════════════════════════════════════════════════════════════╝
 
 [build]
-  command   = "npm install && npm run build"
+  command   = "npm install --legacy-peer-deps && npm run build"
   publish   = "dist"                       # Vite outputs the production site here
 
 [build.environment]
   NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
   
 # ── Frontend → backend pretty URLs ────────────────────────────────
 # Anything the React app POSTs to /api/<name> gets routed to the
