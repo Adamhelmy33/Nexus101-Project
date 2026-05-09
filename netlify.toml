@@ -9,14 +9,12 @@
 # ╚══════════════════════════════════════════════════════════════════╝
 
 [build]
-  command   = "npm install --legacy-peer-deps && npm run build"
+  command   = "npm install && npm run build"
   publish   = "dist"                       # Vite outputs the production site here
-  functions = "netlify/functions"           # Serverless backend lives here
 
 [build.environment]
-  NODE_VERSION = "20"
-  NPM_FLAGS    = "--legacy-peer-deps"      # Needed because @vitejs/plugin-react peer-deps Vite 7 max
-
+  NODE_VERSION = "18"
+  
 # ── Frontend → backend pretty URLs ────────────────────────────────
 # Anything the React app POSTs to /api/<name> gets routed to the
 # matching function in netlify/functions/<name>.js.
