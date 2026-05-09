@@ -1,29 +1,22 @@
-# ╔══════════════════════════════════════════════════════════════════╗
-# ║   Nexus 101 — Netlify deployment config                          ║
-# ╚══════════════════════════════════════════════════════════════════╝
-
 [build]
-  command = "npm install --legacy-peer-deps --include=dev && npm run build"
+  command = "npm install --legacy-peer-deps && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
 
-# ── Frontend → backend pretty URLs ────────────────────────────────
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
 
-# ── SPA fallback ──────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# ── Security headers ──────────────────────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]
@@ -43,7 +36,6 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# ── Per-function settings ─────────────────────────────────────────
 [functions."study-buddy"]
   timeout = 26
 
