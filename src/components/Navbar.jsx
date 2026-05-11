@@ -3,9 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Menu, X, ShoppingCart, BookOpen, LogOut, LayoutDashboard, ChevronDown,
-  BarChart3, Coins, Wand2,
+  BarChart3, Coins,
 } from 'lucide-react'
-import Logo from './Logo'
 import { useAuth } from '../contexts/AuthContext'
 import WalletBalanceBadge from './wallet/WalletBalanceBadge'
 
@@ -67,8 +66,6 @@ export default function Navbar() {
     : {}
 
   const linkColor = isHome ? 'text-white/90' : 'text-gray-700'
-  const logoVariant = isHome ? 'white' : 'blue'
-  const logoHeight = isHome ? 44 : 40   // ← bigger overall, esp. on home
 
   return (
     <>
@@ -82,9 +79,36 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
 
-            {/* ── Logo (bigger) ── */}
-            <Link to="/" className="flex items-center group">
-              <Logo variant={logoVariant} height={logoHeight} className="transition-transform group-hover:scale-105" />
+            {/* ── Logo ── */}
+            <Link
+              to="/"
+              className="flex items-center hover:opacity-75 transition-opacity duration-200"
+            >
+              <span
+                style={{
+                  fontFamily: '"DM Sans", ui-sans-serif, system-ui, sans-serif',
+                  fontSize: '1.75rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.07em',
+                  lineHeight: 1,
+                  color: isHome ? '#ffffff' : '#0a1628',
+                }}
+              >
+                NEXUS
+              </span>
+              <span
+                style={{
+                  fontFamily: '"DM Sans", ui-sans-serif, system-ui, sans-serif',
+                  fontSize: '1.75rem',
+                  fontWeight: 300,
+                  letterSpacing: '0.07em',
+                  lineHeight: 1,
+                  marginLeft: '0.3em',
+                  color: isHome ? '#ffffff' : '#0047AB',
+                }}
+              >
+                101
+              </span>
             </Link>
 
             {/* ── Desktop nav ── */}
@@ -98,7 +122,7 @@ export default function Navbar() {
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                       isActive
                         ? 'bg-primary text-white shadow-md'
-                        : `${linkColor} hover:bg-primary/10 hover:text-primary`
+                        : `${linkColor} hover:bg-primary hover:text-white`
                     }`}
                   >
                     {link.label}
@@ -111,7 +135,7 @@ export default function Navbar() {
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     location.pathname.startsWith('/my-courses') || location.pathname.startsWith('/learn')
                       ? 'bg-primary text-white shadow-md'
-                      : `${linkColor} hover:bg-primary/10 hover:text-primary`
+                      : `${linkColor} hover:bg-primary hover:text-white`
                   }`}
                 >
                   <BookOpen className="w-4 h-4" />
@@ -183,10 +207,6 @@ export default function Navbar() {
                         </Link>
                         <Link to="/wallet" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">
                           <Coins className="w-4 h-4 text-yellow-500" /> Nexus Wallet
-                        </Link>
-                        <Link to="/custom-course" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">
-                          <Wand2 className="w-4 h-4 text-purple-500" /> Custom Course Builder
-                          <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 font-bold uppercase tracking-widest">New</span>
                         </Link>
                         {isAdmin && (
                           <Link to="/admin-nexus" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">

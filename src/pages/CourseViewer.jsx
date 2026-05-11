@@ -6,14 +6,16 @@ import {
   FileText, MessageCircle, StickyNote, X, Menu,
   AlertTriangle, Home, Clock, CheckCircle2, ShoppingCart,
 } from 'lucide-react'
-import { COURSES, WHATSAPP_TUTOR_NUMBER } from '../data/constants'
+import { WHATSAPP_TUTOR_NUMBER } from '../data/constants'
 import { useAuth } from '../contexts/AuthContext'
 import { hasPurchased } from '../lib/auth'
 import BunnyVideoPlayer from '../components/video/BunnyVideoPlayer'
 import { getSegmentsForCourse, DEMO_HLS_URL } from '../data/segments'
 import { recordWatch } from '../lib/progress'
+import { supabase } from '../lib/supabase'
+import { useCatalog } from '../hooks/useCatalog'
 
-/* ── Mock lesson data ───────────────────────── */
+/* ── Mock lesson data (used when no modules exist in DB for a course) ── */
 const MOCK_MODULES = [
   {
     id: 1,
@@ -45,12 +47,12 @@ const MOCK_MODULES = [
 ]
 
 const MOCK_RESOURCES = [
-  { id: 1, lesson: 'l1', name: 'Introduction Slides.pdf',    size: '1.2 MB' },
+  { id: 1, lesson: 'l1', name: 'Introduction Slides.pdf',      size: '1.2 MB' },
   { id: 2, lesson: 'l2', name: 'Core Concepts Cheatsheet.pdf', size: '0.8 MB' },
-  { id: 3, lesson: 'l3', name: 'Example Problems.pdf',       size: '2.1 MB' },
+  { id: 3, lesson: 'l3', name: 'Example Problems.pdf',         size: '2.1 MB' },
 ]
 
-/* ── Anti-piracy effect (still used at the page level for non-video controls) ── */
+/* ── Anti-piracy effect ── */
 function useAntiPiracy() {
   useEffect(() => {
     const block = (e) => e.preventDefault()
@@ -70,15 +72,61 @@ function useAntiPiracy() {
 export default function CourseViewer() {
   const { courseId } = useParams()
   const { user } = useAuth()
-  const course = COURSES.find(c => c.id === courseId) ?? COURSES[0]
+  const { courses, loading: catalogLoading } = useCatalog()
 
+  // ── All hooks must be declared before any early returns ──
   useAntiPiracy()
 
-  /* ── Auth + purchase guards ── */
+  const [activeLesson, setActiveLesson] = useState(MOCK_MODULES[0].lessons[0])
+  const [expandedMods, setExpandedMods] = useState({ 1: true })
+  const [activeTab, setActiveTab]       = useState('resources')
+  const [sidebarOpen, setSidebarOpen]   = useState(false)
+  const [note, setNote]                 = useState('')
+  const [chapters, setChapters]         = useState([])
+
+  // Fetch video segments: try Supabase first (for DB courses), fall back to static demo data
+  useEffect(() => {
+    async function fetchChapters() {
+      // Look up the course UUID by slug — only DB-seeded courses will have a row
+      const { data: courseRow } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('slug', courseId)
+        .maybeSingle()
+
+      if (courseRow?.id) {
+        const { data: rows } = await supabase
+          .from('video_segments')
+          .select('id, start_sec, end_sec, title, subject, difficulty')
+          .eq('course_id', courseRow.id)
+          .order('start_sec')
+        setChapters(rows ?? [])
+      } else {
+        // Static courses: use demo segments from segments.js
+        setChapters(getSegmentsForCourse(courseId))
+      }
+    }
+    fetchChapters()
+  }, [courseId])
+
+  // ── Now safe to do derived values and early returns ──
   if (!user) {
     return <Navigate to="/login" state={{ from: `/learn/${courseId}` }} replace />
   }
-  if (!hasPurchased(user, course.id)) {
+
+  // Show a minimal loading state while catalog resolves (only needed for DB-only courses)
+  const course = courses.find(c => c.id === courseId)
+  if (!course && catalogLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a1628' }}>
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  const resolvedCourse = course ?? courses[0]
+
+  if (!hasPurchased(user, resolvedCourse.id)) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-16" style={{ background: '#f8faff' }}>
         <motion.div
@@ -93,10 +141,10 @@ export default function CourseViewer() {
             Access denied
           </h2>
           <p className="text-gray-500 text-sm mb-6">
-            You haven't purchased <strong>{course.title}</strong> yet. Buy access to unlock all videos and PDFs in this module.
+            You haven't purchased <strong>{resolvedCourse.title}</strong> yet. Buy access to unlock all videos and PDFs in this module.
           </p>
           <div className="flex flex-col gap-3">
-            <Link to={`/checkout/${course.id}`} className="btn-primary justify-center">
+            <Link to={`/checkout/${resolvedCourse.id}`} className="btn-primary justify-center">
               <ShoppingCart className="w-4 h-4" /> Buy Access
             </Link>
             <Link to="/store" className="text-sm text-gray-500 hover:text-primary">← Back to store</Link>
@@ -106,12 +154,6 @@ export default function CourseViewer() {
     )
   }
 
-  const [activeLesson, setActiveLesson]   = useState(MOCK_MODULES[0].lessons[0])
-  const [expandedMods, setExpandedMods]   = useState({ 1: true })
-  const [activeTab, setActiveTab]         = useState('resources')
-  const [sidebarOpen, setSidebarOpen]     = useState(false)
-  const [note, setNote]                   = useState('')
-
   const toggleMod = (id) => setExpandedMods(e => ({ ...e, [id]: !e[id] }))
 
   const allLessons   = MOCK_MODULES.flatMap(m => m.lessons)
@@ -119,8 +161,8 @@ export default function CourseViewer() {
   const prevLesson   = allLessons[currentIdx - 1]
   const nextLesson   = allLessons[currentIdx + 1]
 
-  const resources = MOCK_RESOURCES.filter(r => r.lesson === activeLesson.id)
-  const totalDone = allLessons.filter(l => l.done).length
+  const resources  = MOCK_RESOURCES.filter(r => r.lesson === activeLesson.id)
+  const totalDone  = allLessons.filter(l => l.done).length
 
   return (
     <div
@@ -138,16 +180,10 @@ export default function CourseViewer() {
       >
         {/* Sidebar header */}
         <div className="p-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm"
-          >
+          <Link to="/" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm">
             <Home className="w-4 h-4" /> Nexus 101
           </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-white/50 hover:text-white"
-          >
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white/50 hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -155,13 +191,12 @@ export default function CourseViewer() {
         {/* Course title */}
         <div className="p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <h2 className="text-white font-bold text-base mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
-            {course.title}
+            {resolvedCourse.title}
           </h2>
           <div className="flex items-center justify-between text-xs text-white/40">
             <span>{totalDone}/{allLessons.length} lessons</span>
             <span className="text-primary-light">{Math.round((totalDone / allLessons.length) * 100)}% complete</span>
           </div>
-          {/* Progress bar */}
           <div className="mt-2 h-1 rounded-full bg-white/10">
             <div
               className="h-1 rounded-full transition-all"
@@ -177,18 +212,14 @@ export default function CourseViewer() {
         <div className="flex-1 overflow-y-auto py-2">
           {MOCK_MODULES.map(mod => (
             <div key={mod.id}>
-              {/* Module header */}
               <button
                 onClick={() => toggleMod(mod.id)}
                 className="w-full flex items-center justify-between px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 transition-colors text-sm font-semibold"
               >
                 <span>{mod.title}</span>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${expandedMods[mod.id] ? 'rotate-180' : ''}`}
-                />
+                <ChevronDown className={`w-4 h-4 transition-transform ${expandedMods[mod.id] ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Lessons */}
               {expandedMods[mod.id] && mod.lessons.map(lesson => {
                 const isActive = lesson.id === activeLesson.id
                 return (
@@ -196,21 +227,18 @@ export default function CourseViewer() {
                     key={lesson.id}
                     onClick={() => { setActiveLesson(lesson); setSidebarOpen(false) }}
                     className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${
-                      isActive
-                        ? 'bg-primary/20 border-r-2 border-primary'
-                        : 'hover:bg-white/5'
+                      isActive ? 'bg-primary/20 border-r-2 border-primary' : 'hover:bg-white/5'
                     }`}
                   >
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
                       lesson.done ? 'bg-green-500' : isActive ? 'bg-primary' : 'bg-white/10'
                     }`}>
-                      {lesson.done ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                      ) : !lesson.free ? (
-                        <Lock className="w-3 h-3 text-white/60" />
-                      ) : (
-                        <Play className="w-3 h-3 text-white" />
-                      )}
+                      {lesson.done
+                        ? <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                        : !lesson.free
+                          ? <Lock className="w-3 h-3 text-white/60" />
+                          : <Play className="w-3 h-3 text-white" />
+                      }
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs font-medium truncate ${isActive ? 'text-white' : 'text-white/65'}`}>
@@ -218,9 +246,7 @@ export default function CourseViewer() {
                       </p>
                       <p className="text-xs text-white/30 flex items-center gap-1 mt-0.5">
                         <Clock className="w-2.5 h-2.5" /> {lesson.duration}
-                        {lesson.free && (
-                          <span className="ml-1 text-primary-light text-xs">Free</span>
-                        )}
+                        {lesson.free && <span className="ml-1 text-primary-light text-xs">Free</span>}
                       </p>
                     </div>
                   </button>
@@ -239,17 +265,13 @@ export default function CourseViewer() {
           className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
           style={{ background: '#0f1e35', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-white/60 hover:text-white"
-          >
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-white/60 hover:text-white">
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <ChevronRight className="w-4 h-4 text-white/30 flex-shrink-0" />
             <span className="text-white/50 text-sm truncate">{activeLesson.title}</span>
           </div>
-          {/* Anti-piracy warning */}
           <div className="hidden sm:flex items-center gap-1.5 text-yellow-500/60 text-xs">
             <AlertTriangle className="w-3.5 h-3.5" />
             <span>Recording prohibited</span>
@@ -258,17 +280,16 @@ export default function CourseViewer() {
 
         {/* Video + content */}
         <div className="flex-1 overflow-y-auto">
-          {/* Bunny.net video player with HLS.js + DRM watermark + chapters */}
           <BunnyVideoPlayer
-            videoId={course.id}
-            courseId={course.id}
+            videoId={resolvedCourse.id}
+            courseId={resolvedCourse.id}
             fallbackUrl={DEMO_HLS_URL}
             user={user}
-            chapters={getSegmentsForCourse(course.id)}
-            title={`${course.title} — ${activeLesson.title}`}
+            chapters={chapters}
+            title={`${resolvedCourse.title} — ${activeLesson.title}`}
             onWatchedSeconds={(delta) => recordWatch({
               userEmail: user.email,
-              courseId:  course.id,
+              courseId:  resolvedCourse.id,
               moduleId:  activeLesson.id,
               seconds:   delta,
             })}
@@ -276,14 +297,13 @@ export default function CourseViewer() {
 
           {/* Info + tabs */}
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-            {/* Lesson title + nav */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h1 className="text-white text-xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>
                   {activeLesson.title}
                 </h1>
                 <p className="text-white/40 text-sm mt-1">
-                  {course.title} • {activeLesson.duration}
+                  {resolvedCourse.title} • {activeLesson.duration}
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -341,10 +361,8 @@ export default function CourseViewer() {
                         className="flex items-center gap-4 p-4 rounded-xl"
                         style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                       >
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}
-                        >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                             style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}>
                           <FileText className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -392,7 +410,7 @@ export default function CourseViewer() {
                 </p>
                 <a
                   href={`https://wa.me/${WHATSAPP_TUTOR_NUMBER}?text=${encodeURIComponent(
-                    `Hi! I'm watching "${activeLesson.title}" in ${course.title} and I have a question:\n\n`
+                    `Hi! I'm watching "${activeLesson.title}" in ${resolvedCourse.title} and I have a question:\n\n`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

@@ -1,34 +1,32 @@
-import { useState } from 'react'
-
-/**
- * Logo — uses /logo/logo-blue.png on light backgrounds and
- * /logo/logo-white.png on dark backgrounds. If the image file
- * is missing, gracefully falls back to a text logo.
- */
 export default function Logo({ variant = 'blue', className = '', height = 32 }) {
-  const [errored, setErrored] = useState(false)
+  const isDark = variant === 'white'
 
-  const src = variant === 'white' ? '/logo/logo-white.png' : '/logo/logo-blue.png'
-  const textColor = variant === 'white' ? '#ffffff' : '#0047AB'
+  const nexusColor = isDark ? '#ffffff' : '#0a1628'
+  const accentColor = isDark ? '#38bdf8' : '#f0a500'
 
-  if (errored) {
-    return (
-      <span
-        className={`font-bold ${className}`}
-        style={{ fontFamily: 'Playfair Display, serif', color: textColor, fontSize: height * 0.6 }}
-      >
-        Nexus <span style={{ color: '#f0a500' }}>101</span>
-      </span>
-    )
-  }
+  const fontSize = Math.round(height * 0.52)
 
   return (
-    <img
-      src={src}
-      alt="Nexus 101"
-      onError={() => setErrored(true)}
-      className={className}
-      style={{ height, width: 'auto', objectFit: 'contain' }}
-    />
+    <span
+      className={`inline-flex items-center select-none ${className}`}
+      style={{
+        fontFamily: '"DM Sans", ui-sans-serif, system-ui, sans-serif',
+        fontSize,
+        lineHeight: 1,
+        letterSpacing: '0.07em',
+      }}
+    >
+      <span style={{ color: nexusColor, fontWeight: 800 }}>NEXUS</span>
+      <span
+        style={{
+          color: accentColor,
+          fontWeight: 600,
+          marginLeft: '0.3em',
+          letterSpacing: '0.04em',
+        }}
+      >
+        101
+      </span>
+    </span>
   )
 }

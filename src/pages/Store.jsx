@@ -6,10 +6,10 @@ import {
   ShoppingCart, Lock, BookOpen, Tag, Sparkles, GraduationCap,
   Layers, X,
 } from 'lucide-react'
-import { COURSES, UNIVERSITIES } from '../data/constants'
 import { useAuth } from '../contexts/AuthContext'
 import { hasPurchased } from '../lib/auth'
 import { pointsCostFor } from '../lib/pricing'
+import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -79,7 +79,6 @@ function ModuleCard({ course, owned, university }) {
         )}
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10" />
 
-        {/* University tag */}
         {university && (
           <span className="absolute bottom-4 right-4 text-[10px] font-bold uppercase tracking-widest text-white/80 px-2 py-1 rounded-md backdrop-blur-sm"
                 style={{ background: 'rgba(0,0,0,0.25)' }}>
@@ -98,20 +97,20 @@ function ModuleCard({ course, owned, university }) {
         <p className="text-gray-500 text-sm mb-4 leading-relaxed">{course.description}</p>
 
         <div className="flex items-center gap-3 mb-4 text-xs text-gray-400 flex-wrap">
-          <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {course.students.toLocaleString()}</span>
+          <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {(course.students ?? 0).toLocaleString()}</span>
           <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {course.hours}h</span>
           <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> {course.modules}</span>
           <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" /> 4.9</span>
         </div>
 
         <ul className="space-y-1.5 mb-5 flex-1">
-          {course.topics.slice(0, 4).map(topic => (
+          {(course.topics ?? []).slice(0, 4).map(topic => (
             <li key={topic} className="flex items-start gap-2 text-sm text-gray-600">
               <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
               {topic}
             </li>
           ))}
-          {course.topics.length > 4 && (
+          {(course.topics ?? []).length > 4 && (
             <li className="text-xs text-gray-400 pl-6">+ {course.topics.length - 4} more topics</li>
           )}
         </ul>
@@ -160,6 +159,7 @@ export default function Store() {
   const [active, setActive] = useState(params.get('uni') || 'all')
   const [search, setSearch] = useState('')
   const { user } = useAuth()
+  const { courses, universities } = useCatalog()
 
   /* Sync URL when filter changes */
   useEffect(() => {
@@ -172,27 +172,27 @@ export default function Store() {
   }, [active])
 
   const filtered = useMemo(() => {
-    let list = COURSES
+    let list = courses
     if (active !== 'all') list = list.filter(c => c.universityId === active)
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(c =>
         c.title.toLowerCase().includes(q) ||
         c.subtitle.toLowerCase().includes(q) ||
-        c.topics.some(t => t.toLowerCase().includes(q))
+        (c.topics ?? []).some(t => t.toLowerCase().includes(q))
       )
     }
     return list
-  }, [active, search])
+  }, [courses, active, search])
 
   /* Group by university for "All" view */
   const grouped = useMemo(() => {
     if (active !== 'all') return null
-    return UNIVERSITIES.map(uni => ({
+    return universities.map(uni => ({
       uni,
       courses: filtered.filter(c => c.universityId === uni.id),
     })).filter(g => g.courses.length > 0)
-  }, [active, filtered])
+  }, [universities, active, filtered])
 
   return (
     <div>
@@ -214,7 +214,7 @@ export default function Store() {
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                     className="text-white/65 text-lg">
-            High-intensity revisions for UH, BUE, and GUC modules.
+            High-intensity revisions for UH, BUE, GUC, Coventry and Medicine modules.
           </motion.p>
         </div>
         <svg className="absolute bottom-0 left-0 right-0" viewBox="0 0 1440 50" fill="none">
@@ -243,17 +243,17 @@ export default function Store() {
               <Layers className={`w-5 h-5 ${active === 'all' ? 'text-white' : 'text-primary'}`} />
               <div className="text-left">
                 <p className={`text-xs font-mono uppercase tracking-widest ${active === 'all' ? 'text-white/70' : 'text-gray-400'}`}>All</p>
-                <p className="text-sm font-semibold">{COURSES.length} modules</p>
+                <p className="text-sm font-semibold">{courses.length} modules</p>
               </div>
             </button>
 
-            {UNIVERSITIES.map(uni => (
+            {universities.map(uni => (
               <UniversityChip
                 key={uni.id}
                 uni={uni}
                 isActive={active === uni.id}
                 onClick={() => setActive(uni.id)}
-                count={COURSES.filter(c => c.universityId === uni.id).length}
+                count={courses.filter(c => c.universityId === uni.id).length}
               />
             ))}
           </div>
@@ -312,7 +312,7 @@ export default function Store() {
             </motion.div>
           ) : grouped ? (
             <motion.div key={'grouped' + search} variants={stagger} initial="hidden" animate="show" className="space-y-12">
-              {grouped.map(({ uni, courses }) => (
+              {grouped.map(({ uni, courses: groupCourses }) => (
                 <div key={uni.id}>
                   <div className="flex items-center justify-between mb-5 pb-3" style={{ borderBottom: `2px solid ${uni.color}25` }}>
                     <div className="flex items-center gap-3">
@@ -336,7 +336,7 @@ export default function Store() {
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {courses.map(course => (
+                    {groupCourses.map(course => (
                       <ModuleCard
                         key={course.id}
                         course={course}
@@ -356,7 +356,7 @@ export default function Store() {
                   key={course.id}
                   course={course}
                   owned={hasPurchased(user, course.id)}
-                  university={UNIVERSITIES.find(u => u.id === course.universityId)}
+                  university={universities.find(u => u.id === course.universityId)}
                 />
               ))}
             </motion.div>

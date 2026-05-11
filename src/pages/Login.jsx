@@ -155,14 +155,6 @@ export default function Login() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
-
-              {mode === 'login' && (
-                <div className="mt-6 p-4 rounded-xl text-xs" style={{ background: '#f8faff', border: '1px solid #e2ecf9' }}>
-                  <p className="font-semibold text-gray-700 mb-1">Demo accounts (for testing):</p>
-                  <p className="text-gray-500">Admin: <code className="font-mono text-primary">admin@nexus101.com</code> / <code className="font-mono text-primary">nexus2025</code></p>
-                  <p className="text-gray-500">Student: <code className="font-mono text-primary">demo@student.com</code> / <code className="font-mono text-primary">demo123</code></p>
-                </div>
-              )}
             </motion.div>
           </AnimatePresence>
         </div>

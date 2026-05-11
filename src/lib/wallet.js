@@ -17,7 +17,7 @@
      so historical receipts stay accurate even if config changes later.
    ═══════════════════════════════════════════════ */
 
-import { COURSES } from '../data/constants'
+import { findCachedCourse } from './courseCache'
 import {
   pointsCostFor, recommendedBundleFor, getTierForLifetime, getNextTier,
 } from './pricing'
@@ -118,7 +118,7 @@ export function creditWallet({ userEmail, points, paymobTxnId, integration = 'ca
    Snapshots the current price into the ledger so historical
    records stay accurate even if config changes. */
 export function redeemCourse({ userEmail, courseId }) {
-  const course = COURSES.find(c => c.id === courseId)
+  const course = findCachedCourse(courseId)
   if (!course) return { ok: false, error: 'Course not found.' }
 
   const purchasePrice = pointsCostFor(course)   // 🔑 snapshot at the moment of purchase

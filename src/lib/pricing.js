@@ -8,7 +8,7 @@
    ═══════════════════════════════════════════════ */
 
 import config from '../../nexus.config.js'
-import { COURSES } from '../data/constants'
+import { getCachedCourses, findCachedCourse } from './courseCache'
 
 /* ── Currency conversion ───────────────────────── */
 export function pointsToEgp(points)      { return Math.round(points * config.exchangeRate) }
@@ -21,7 +21,7 @@ export function egpToPoints(egp)         { return Math.round(egp / config.exchan
    Accepts either a course object OR a courseId string. */
 export function pointsCostFor(courseOrId) {
   const course = typeof courseOrId === 'string'
-    ? COURSES.find(c => c.id === courseOrId)
+    ? findCachedCourse(courseOrId)
     : courseOrId
   if (!course) return config.defaultCoursePoints
 
@@ -82,7 +82,7 @@ export function allShelfBundles() {
    Used by FreeCourseProgress and Dashboard to compute "X NXP from free course". */
 export function getNextFreeTarget(userPurchases = []) {
   const owned = new Set(userPurchases.map(p => p.courseId))
-  const candidates = COURSES
+  const candidates = getCachedCourses()
     .filter(c => !owned.has(c.id))
     .map(c => ({ course: c, price: pointsCostFor(c) }))
     .sort((a, b) => a.price - b.price)
@@ -90,7 +90,7 @@ export function getNextFreeTarget(userPurchases = []) {
   if (candidates.length > 0) return candidates[0]
 
   /* No unowned courses left — fall back to global default */
-  const fallbackCourse = COURSES[0]
+  const fallbackCourse = getCachedCourses()[0]
   return { course: fallbackCourse, price: fallbackCourse ? pointsCostFor(fallbackCourse) : config.defaultCoursePoints }
 }
 

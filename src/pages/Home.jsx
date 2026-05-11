@@ -10,7 +10,8 @@ import AnimatedCounter from '../components/AnimatedCounter'
 import Avatar from '../components/Avatar'
 import ParallaxBackground from '../components/ParallaxBackground'
 import WhatsAppTutorButton from '../components/WhatsAppTutorButton'
-import { COURSES, FOUNDERS, STATS, UNIVERSITIES, INSTRUCTORS } from '../data/constants'
+import { FOUNDERS, STATS } from '../data/constants'
+import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
@@ -36,8 +37,8 @@ const STAT_ICONS = {
 }
 
 /* ─── University card ─────────────────────────── */
-function UniversityCard({ uni, idx }) {
-  const moduleCount = COURSES.filter(c => c.universityId === uni.id).length
+function UniversityCard({ uni, idx, courses }) {
+  const moduleCount = courses.filter(c => c.universityId === uni.id).length
   return (
     <motion.div
       variants={fadeUp}
@@ -173,6 +174,7 @@ function FounderHero({ founder }) {
 
 /* ═══════════════════════════════════════════════ */
 export default function Home() {
+  const { courses, universities, instructors } = useCatalog()
   const heroRef = useRef(null)
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const heroY     = useTransform(scrollYProgress, [0, 1], [0, 200])
@@ -185,7 +187,20 @@ export default function Home() {
       <div className="relative" style={{ zIndex: 1 }}>
 
         {/* ────── HERO ────── */}
-        <section ref={heroRef} className="hero-gradient relative min-h-screen flex flex-col justify-center overflow-hidden">
+        <section
+          ref={heroRef}
+          className="relative isolate min-h-screen flex flex-col justify-center overflow-hidden"
+          style={{ background: 'radial-gradient(ellipse at 55% 45%, #0d1e3d 0%, #06101f 100%)' }}
+        >
+          {/* ── Background logo ── */}
+          <img
+            src="/logo/logo-white.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full opacity-[0.13] blur-[2px] object-contain pointer-events-none select-none"
+            style={{ zIndex: -1 }}
+          />
+
           <motion.div style={{ y: heroY, opacity: heroFade }} className="absolute inset-0 pointer-events-none select-none">
             <div className="animate-float absolute top-20 right-16 w-64 h-64 rounded-full opacity-10"
                  style={{ background: 'radial-gradient(circle, #ffffff, transparent)' }} />
@@ -339,7 +354,7 @@ export default function Home() {
               </motion.div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {UNIVERSITIES.map((uni, idx) => <UniversityCard key={uni.id} uni={uni} idx={idx} />)}
+                {universities.map((uni, idx) => <UniversityCard key={uni.id} uni={uni} idx={idx} courses={courses} />)}
               </div>
 
               <motion.div variants={fadeUp} className="text-center mt-10">
@@ -368,7 +383,7 @@ export default function Home() {
               </motion.div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                {INSTRUCTORS.map(ins => <InstructorMiniCard key={ins.id} ins={ins} />)}
+                {instructors.map(ins => <InstructorMiniCard key={ins.id} ins={ins} />)}
               </div>
 
               <motion.div variants={fadeUp} className="text-center mt-10">

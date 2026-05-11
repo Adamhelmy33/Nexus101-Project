@@ -7,7 +7,6 @@ import WhatsAppButton  from './components/WhatsAppButton'
 import ProtectedRoute  from './components/ProtectedRoute'
 import ScrollProgress  from './components/ScrollProgress'
 import BackToTop       from './components/BackToTop'
-import StudyBuddyWidget from './components/studyBuddy/StudyBuddyWidget'
 
 import Home            from './pages/Home'
 import Store           from './pages/Store'
@@ -100,7 +99,6 @@ export default function App() {
       {!noNavFooter && <Footer />}
       {!noChrome     && <BackToTop />}
       {!noChrome     && <WhatsAppButton />}
-      {!noChrome     && <StudyBuddyWidget />}
     </div>
   )
 }
