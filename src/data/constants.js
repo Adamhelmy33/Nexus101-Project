@@ -1,12 +1,17 @@
 /* ═══════════════════════════════════════════════
    Nexus 101 — Application Data
    ═══════════════════════════════════════════════
-   BEGINNER GUIDE — what to edit:
-   • UNIVERSITIES   → add/edit the 3 target universities below
-   • COURSES        → add/edit revision modules per university
+   PRIMARY SOURCE OF TRUTH: Supabase database.
+   useCatalog() fetches live data; these arrays are
+   static fallbacks used when the DB is unavailable
+   and by non-hook lib files (progress.js, etc.).
+
+   To update universities/courses/instructors:
+   edit the data in Supabase directly (or re-run
+   seed.sql / seed_content.sql).
+
    • FOUNDERS       → the 2 co-founders
    • TEAM           → graphic designer + anyone else
-   • INSTRUCTORS    → the 6 tutors (names, subjects, photos)
    • SEED_USERS     → starting accounts (admin password etc.)
    ═══════════════════════════════════════════════ */
 

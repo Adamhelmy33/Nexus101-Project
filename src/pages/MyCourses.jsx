@@ -4,9 +4,9 @@ import {
   Play, Clock, BookOpen, Lock, ShoppingCart, ArrowRight,
   CheckCircle2, Calendar, Sparkles,
 } from 'lucide-react'
-import { COURSES } from '../data/constants'
 import { useAuth } from '../contexts/AuthContext'
 import { pointsCostFor } from '../lib/pricing'
+import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -16,11 +16,12 @@ const stagger = { show: { transition: { staggerChildren: 0.1 } } }
 
 export default function MyCourses() {
   const { user } = useAuth()
+  const { courses } = useCatalog()
 
   const ownedIds  = (user.purchases || []).map(p => p.courseId)
   const ownedSet  = new Set(ownedIds)
-  const owned     = COURSES.filter(c => ownedSet.has(c.id))
-  const notOwned  = COURSES.filter(c => !ownedSet.has(c.id))
+  const owned     = courses.filter(c => ownedSet.has(c.id))
+  const notOwned  = courses.filter(c => !ownedSet.has(c.id))
 
   return (
     <div className="min-h-screen pt-24 pb-16" style={{ background: '#f8faff' }}>

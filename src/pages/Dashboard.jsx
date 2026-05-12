@@ -8,12 +8,12 @@ import {
 import { useAuth } from '../contexts/AuthContext'
 import { useWallet } from '../contexts/WalletContext'
 import { getProgressSummary, seedDemoProgress } from '../lib/progress'
-import { COURSES } from '../data/constants'
+import { WHATSAPP_TUTOR_NUMBER } from '../data/constants'
+import { useCatalog } from '../hooks/useCatalog'
 import SkillHeatmap from '../components/dashboard/SkillHeatmap'
 import HoursChart   from '../components/dashboard/HoursChart'
 import LoyaltyTierCard from '../components/wallet/LoyaltyTierCard'
 import FreeCourseProgress from '../components/wallet/FreeCourseProgress'
-import { WHATSAPP_TUTOR_NUMBER } from '../data/constants'
 
 export default function Dashboard() {
   const { user } = useAuth()

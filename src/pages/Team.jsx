@@ -5,7 +5,8 @@ import {
   GraduationCap, Palette, Users,
 } from 'lucide-react'
 import Avatar from '../components/Avatar'
-import { FOUNDERS, TEAM, INSTRUCTORS } from '../data/constants'
+import { FOUNDERS, TEAM } from '../data/constants'
+import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -182,6 +183,8 @@ function InstructorCard({ ins }) {
 }
 
 export default function Team() {
+  const { instructors, loading } = useCatalog()
+
   return (
     <div>
       {/* ── Hero ── */}
@@ -242,10 +245,27 @@ export default function Team() {
             </p>
           </motion.div>
 
-          <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {INSTRUCTORS.map(ins => <InstructorCard key={ins.id} ins={ins} />)}
-          </motion.div>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden animate-pulse">
+                  <div className="h-32 bg-gray-200" />
+                  <div className="p-5 flex flex-col items-center gap-3">
+                    <div className="w-20 h-20 rounded-full bg-gray-200 -mt-16" />
+                    <div className="h-4 w-32 bg-gray-200 rounded" />
+                    <div className="h-3 w-24 bg-gray-100 rounded" />
+                    <div className="h-3 w-full bg-gray-100 rounded" />
+                    <div className="h-3 w-5/6 bg-gray-100 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {instructors.map(ins => <InstructorCard key={ins.id} ins={ins} />)}
+            </motion.div>
+          )}
         </section>
 
         {/* ── Wider team / designer ── */}

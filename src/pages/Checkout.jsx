@@ -5,8 +5,8 @@ import {
   Coins, ShieldCheck, ArrowLeft, CheckCircle2, AlertCircle,
   Sparkles, BookOpen, Clock, Plus, Zap,
 } from 'lucide-react'
-import { COURSES, UNIVERSITIES } from '../data/constants'
 import { useAuth } from '../contexts/AuthContext'
+import { useCatalog } from '../hooks/useCatalog'
 import { useWallet } from '../contexts/WalletContext'
 import { hasPurchased } from '../lib/auth'
 import BundlePurchaseModal from '../components/wallet/BundlePurchaseModal'
@@ -23,15 +23,17 @@ export default function Checkout() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const w        = useWallet()
+  const { courses, universities, loading: catalogLoading } = useCatalog()
 
-  const course      = COURSES.find(c => c.id === courseId)
-  const university  = course && UNIVERSITIES.find(u => u.id === course.universityId)
+  const course      = courses.find(c => c.id === courseId)
+  const university  = course && universities.find(u => u.id === course.universityId)
   const [busy, setBusy]                       = useState(false)
   const [error, setError]                     = useState('')
   const [insufficientOpen, setInsufficientOpen] = useState(false)
   const [bundleOpen, setBundleOpen]             = useState(false)
 
   /* ── Guards ── */
+  if (catalogLoading)                return null           // wait for DB before deciding
   if (!course)                       return <Navigate to="/store" replace />
   if (!user)                         return <Navigate to="/login" state={{ from: `/checkout/${courseId}` }} replace />
   if (hasPurchased(user, course.id)) return <Navigate to="/my-courses" replace />
