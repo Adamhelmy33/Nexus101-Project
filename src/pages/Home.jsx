@@ -174,7 +174,7 @@ function FounderHero({ founder }) {
 
 /* ═══════════════════════════════════════════════ */
 export default function Home() {
-  const { courses, universities, instructors } = useCatalog()
+  const { courses, universities, instructors, loading } = useCatalog()
   const heroRef = useRef(null)
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const heroY     = useTransform(scrollYProgress, [0, 1], [0, 200])
@@ -354,7 +354,20 @@ export default function Home() {
               </motion.div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {universities.map((uni, idx) => <UniversityCard key={uni.id} uni={uni} idx={idx} courses={courses} />)}
+                {loading
+                  ? [...Array(3)].map((_, i) => (
+                      <div key={i} className="rounded-3xl overflow-hidden bg-white shadow-md border border-gray-100 animate-pulse">
+                        <div className="h-48 bg-gray-200" />
+                        <div className="p-6 space-y-3">
+                          <div className="h-5 bg-gray-200 rounded w-3/4" />
+                          <div className="h-3 bg-gray-100 rounded w-1/2" />
+                          <div className="h-3 bg-gray-100 rounded w-full" />
+                          <div className="h-3 bg-gray-100 rounded w-5/6" />
+                        </div>
+                      </div>
+                    ))
+                  : universities.map((uni, idx) => <UniversityCard key={uni.id} uni={uni} idx={idx} courses={courses} />)
+                }
               </div>
 
               <motion.div variants={fadeUp} className="text-center mt-10">
@@ -383,7 +396,17 @@ export default function Home() {
               </motion.div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                {instructors.map(ins => <InstructorMiniCard key={ins.id} ins={ins} />)}
+                {loading
+                  ? [...Array(6)].map((_, i) => (
+                      <div key={i} className="rounded-2xl bg-white shadow-md border border-gray-100 p-5 flex flex-col items-center animate-pulse">
+                        <div className="w-20 h-20 rounded-full bg-gray-200 mb-3" />
+                        <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
+                        <div className="h-3 bg-gray-100 rounded w-16 mb-1" />
+                        <div className="h-3 bg-gray-100 rounded w-20" />
+                      </div>
+                    ))
+                  : instructors.map(ins => <InstructorMiniCard key={ins.id} ins={ins} />)
+                }
               </div>
 
               <motion.div variants={fadeUp} className="text-center mt-10">

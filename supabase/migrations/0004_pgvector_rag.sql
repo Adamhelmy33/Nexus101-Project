@@ -4,10 +4,8 @@
 -- Stores ingested course materials + chunks + embeddings for retrieval.
 -- Uses pgvector for ANN search.
 
-create extension if not exists vector;
-
 create table if not exists course_materials (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   course_id   uuid not null references courses on delete cascade,
   module_id   uuid references modules,
   kind        text not null check (kind in ('pdf','note','transcript')),
@@ -18,23 +16,26 @@ create table if not exists course_materials (
 );
 
 create table if not exists course_chunks (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   material_id uuid not null references course_materials on delete cascade,
   course_id   uuid not null references courses,
   module_id   uuid references modules,
   chunk_index int not null,
   content     text not null,
-  embedding   vector(1536),                     -- OpenAI text-embedding-3-small
   tokens      int,
   meta        jsonb default '{}'::jsonb,
   created_at  timestamptz default now()
 );
+
+-- Add vector column separately so the type resolves after extension is active
+alter table course_chunks add column if not exists embedding vector(1536);
+
 create index if not exists course_chunks_hnsw on course_chunks
   using hnsw (embedding vector_cosine_ops);
 
 -- Conversations & messages
 create table if not exists ai_conversations (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references profiles on delete cascade,
   course_id   uuid references courses,
   module_id   uuid references modules,
@@ -43,7 +44,7 @@ create table if not exists ai_conversations (
 );
 
 create table if not exists ai_messages (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   conversation_id uuid not null references ai_conversations on delete cascade,
   role            text not null check (role in ('user','assistant','system')),
   content         text not null,

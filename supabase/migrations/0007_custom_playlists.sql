@@ -9,7 +9,7 @@
 
 -- ── PARSED SYLLABI (intermediate AI output) ──
 create table if not exists parsed_syllabi (
-  id            uuid primary key default uuid_generate_v4(),
+  id            uuid primary key default gen_random_uuid(),
   user_id       uuid not null references profiles on delete cascade,
   source_path   text,                                      -- Supabase Storage URL of the PDF
   raw_text      text,                                      -- extracted plain text
@@ -26,7 +26,7 @@ create index if not exists parsed_syllabi_user_idx on parsed_syllabi (user_id, c
 
 -- ── CUSTOM PLAYLISTS (the assembled course) ──
 create table if not exists custom_playlists (
-  id           uuid primary key default uuid_generate_v4(),
+  id           uuid primary key default gen_random_uuid(),
   user_id      uuid not null references profiles on delete cascade,
   title        text not null,
   source       text default 'syllabus_upload'
@@ -45,7 +45,7 @@ create index if not exists custom_playlists_user_idx on custom_playlists (user_i
 
 -- ── PLAYLIST ITEMS (ordered list of video segments) ──
 create table if not exists custom_playlist_items (
-  id                uuid primary key default uuid_generate_v4(),
+  id                uuid primary key default gen_random_uuid(),
   playlist_id       uuid not null references custom_playlists on delete cascade,
   segment_id        uuid not null references video_segments,
   position          int  not null,

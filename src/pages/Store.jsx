@@ -159,7 +159,7 @@ export default function Store() {
   const [active, setActive] = useState(params.get('uni') || 'all')
   const [search, setSearch] = useState('')
   const { user } = useAuth()
-  const { courses, universities } = useCatalog()
+  const { courses, universities, loading } = useCatalog()
 
   /* Sync URL when filter changes */
   useEffect(() => {
@@ -231,31 +231,39 @@ export default function Store() {
             Choose your university
           </p>
           <div className="flex items-center gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-            {/* "All" pill */}
-            <button
-              onClick={() => setActive('all')}
-              className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all flex-shrink-0 ${
-                active === 'all'
-                  ? 'border-primary shadow-lg scale-[1.02] bg-primary text-white'
-                  : 'border-gray-200 hover:border-primary/40 bg-white'
-              }`}
-            >
-              <Layers className={`w-5 h-5 ${active === 'all' ? 'text-white' : 'text-primary'}`} />
-              <div className="text-left">
-                <p className={`text-xs font-mono uppercase tracking-widest ${active === 'all' ? 'text-white/70' : 'text-gray-400'}`}>All</p>
-                <p className="text-sm font-semibold">{courses.length} modules</p>
-              </div>
-            </button>
+            {loading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="h-16 w-32 rounded-2xl bg-gray-100 animate-pulse flex-shrink-0" />
+              ))
+            ) : (
+              <>
+                {/* "All" pill */}
+                <button
+                  onClick={() => setActive('all')}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all flex-shrink-0 ${
+                    active === 'all'
+                      ? 'border-primary shadow-lg scale-[1.02] bg-primary text-white'
+                      : 'border-gray-200 hover:border-primary/40 bg-white'
+                  }`}
+                >
+                  <Layers className={`w-5 h-5 ${active === 'all' ? 'text-white' : 'text-primary'}`} />
+                  <div className="text-left">
+                    <p className={`text-xs font-mono uppercase tracking-widest ${active === 'all' ? 'text-white/70' : 'text-gray-400'}`}>All</p>
+                    <p className="text-sm font-semibold">{courses.length} modules</p>
+                  </div>
+                </button>
 
-            {universities.map(uni => (
-              <UniversityChip
-                key={uni.id}
-                uni={uni}
-                isActive={active === uni.id}
-                onClick={() => setActive(uni.id)}
-                count={courses.filter(c => c.universityId === uni.id).length}
-              />
-            ))}
+                {universities.map(uni => (
+                  <UniversityChip
+                    key={uni.id}
+                    uni={uni}
+                    isActive={active === uni.id}
+                    onClick={() => setActive(uni.id)}
+                    count={courses.filter(c => c.universityId === uni.id).length}
+                  />
+                ))}
+              </>
+            )}
           </div>
         </div>
 
@@ -304,7 +312,23 @@ export default function Store() {
 
         {/* ── Grid (grouped or flat) ── */}
         <AnimatePresence mode="wait">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden bg-white shadow-md border border-gray-100 animate-pulse">
+                  <div className="h-44 bg-gray-200" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-100 rounded w-full" />
+                    <div className="h-3 bg-gray-100 rounded w-5/6" />
+                    <div className="h-3 bg-gray-100 rounded w-2/3" />
+                    <div className="h-10 bg-gray-200 rounded-xl mt-4" />
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          ) : filtered.length === 0 ? (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="text-center py-20 text-gray-400">
               <p className="text-5xl mb-4">📭</p>

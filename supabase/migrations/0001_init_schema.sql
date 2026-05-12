@@ -4,7 +4,9 @@
 -- Run this in your Supabase SQL editor (or `supabase db push`).
 -- Idempotent: safe to re-run.
 
-create extension if not exists "uuid-ossp";
+create extension if not exists "uuid-ossp" with schema extensions;
+create extension if not exists "pgcrypto"  with schema extensions;
+create extension if not exists "vector"    with schema public;
 
 -- ── PROFILES (extends auth.users) ───────────────
 create table if not exists profiles (
@@ -19,7 +21,7 @@ create table if not exists profiles (
 
 -- ── UNIVERSITIES & COURSES ──────────────────────
 create table if not exists universities (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   slug        text unique not null,
   name        text not null,
   short_name  text,
@@ -31,7 +33,7 @@ create table if not exists universities (
 );
 
 create table if not exists courses (
-  id            uuid primary key default uuid_generate_v4(),
+  id            uuid primary key default gen_random_uuid(),
   university_id uuid references universities,
   slug          text unique not null,
   title         text not null,
@@ -48,7 +50,7 @@ create table if not exists courses (
 );
 
 create table if not exists modules (
-  id           uuid primary key default uuid_generate_v4(),
+  id           uuid primary key default gen_random_uuid(),
   course_id    uuid not null references courses on delete cascade,
   slug         text not null,
   title        text not null,
@@ -59,7 +61,7 @@ create table if not exists modules (
 );
 
 create table if not exists topics (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   module_id   uuid not null references modules on delete cascade,
   course_id   uuid not null references courses,
   title       text not null,
@@ -69,7 +71,7 @@ create table if not exists topics (
 
 -- ── ENROLLMENTS ─────────────────────────────────
 create table if not exists enrollments (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references profiles on delete cascade,
   course_id   uuid not null references courses,
   source      text not null check (source in ('wallet','admin_grant','promo')),
@@ -88,7 +90,7 @@ create table if not exists wallet_balances (
 );
 
 create table if not exists wallet_ledger (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   user_id         uuid not null references profiles on delete cascade,
   delta_points    int not null,
   kind            text not null check (kind in
@@ -104,7 +106,7 @@ create index if not exists wallet_ledger_user_idx on wallet_ledger (user_id, cre
 
 -- ── PAYMOB ─────────────────────────────────────
 create table if not exists paymob_transactions (
-  id                uuid primary key default uuid_generate_v4(),
+  id                uuid primary key default gen_random_uuid(),
   user_id           uuid not null references profiles on delete cascade,
   paymob_order_id   text unique,
   paymob_txn_id     text unique,
@@ -122,7 +124,7 @@ create table if not exists paymob_transactions (
 
 -- ── PROGRESS / MASTERY ─────────────────────────
 create table if not exists watch_sessions (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references profiles on delete cascade,
   module_id   uuid not null references modules on delete cascade,
   course_id   uuid not null references courses,
@@ -143,7 +145,7 @@ create table if not exists topic_mastery (
 );
 
 create table if not exists quiz_attempts (
-  id                uuid primary key default uuid_generate_v4(),
+  id                uuid primary key default gen_random_uuid(),
   user_id           uuid not null references profiles on delete cascade,
   topic_id          uuid references topics,
   module_id         uuid references modules,
