@@ -7,154 +7,157 @@ import {
 } from '../data/constants'
 import { hydrateCourseCache } from '../lib/courseCache'
 
-// ── Gradient palette: assigned by position so DB courses always get a colour ──
+// ── Gradient fallback palette for DB rows missing gradient columns ─────────────
 const GRADIENTS = [
-  ['#003F87', '#0047AB'],
-  ['#0047AB', '#1a6fd4'],
-  ['#7A0019', '#a30024'],
-  ['#0066B3', '#0047AB'],
-  ['#a30024', '#7A0019'],
-  ['#0066B3', '#005091'],
-  ['#005091', '#0066B3'],
-  ['#dc2626', '#991b1b'],
-  ['#991b1b', '#7f1d1d'],
+  ['#003F87', '#0047AB'], ['#0047AB', '#1a6fd4'], ['#7A0019', '#a30024'],
+  ['#0066B3', '#0047AB'], ['#a30024', '#7A0019'], ['#0066B3', '#005091'],
+  ['#005091', '#0066B3'], ['#dc2626', '#991b1b'], ['#991b1b', '#7f1d1d'],
 ]
-
 function gradientFor(idx) {
   const g = GRADIENTS[idx % GRADIENTS.length]
   return { gradientFrom: g[0], gradientTo: g[1] }
 }
 
-// ── Normalizers: Supabase snake_case → shape the UI components expect ─────────
+// ── Normalizers ────────────────────────────────────────────────────────────────
 
 function normalizeDbCourse(row, idx) {
-  // Static data has gradient colours; DB rows don't — assign by position.
   const staticMatch = STATIC_COURSES.find(c => c.id === row.slug)
-  const { gradientFrom, gradientTo } = staticMatch ?? gradientFor(idx)
-
+  const from = row.gradient_from ?? staticMatch?.gradientFrom ?? gradientFor(idx).gradientFrom
+  const to   = row.gradient_to   ?? staticMatch?.gradientTo   ?? gradientFor(idx).gradientTo
   return {
     id:           row.slug,
     universityId: row.university?.slug ?? '',
     title:        row.title,
-    subtitle:     row.subtitle      ?? '',
-    description:  row.description   ?? '',
-    icon:         staticMatch?.icon  ?? '📚',
-    gradientFrom,
-    gradientTo,
-    // Price shown in EGP on the card — price_points is the NXP cost used by pointsCostFor()
-    price:        row.price_points,
-    oldPrice:     null,
-    currency:     'EGP',
+    subtitle:     row.subtitle     ?? '',
+    description:  row.description  ?? '',
+    icon:         row.icon         ?? staticMatch?.icon ?? '📚',
+    gradientFrom: from,
+    gradientTo:   to,
+    price:        row.price_egp    ?? row.price_points ?? staticMatch?.price ?? 0,
+    oldPrice:     row.old_price_egp ?? staticMatch?.oldPrice ?? null,
+    currency:     row.currency     ?? 'EGP',
     duration:     'Lifetime access',
-    modules:      row.hours ? Math.round(row.hours / 3) : 0,
-    hours:        row.hours     ?? 0,
-    students:     staticMatch?.students ?? 0,
-    level:        row.level     ?? '',
-    // topics_list column doesn't exist yet — fall back to static or empty
-    features:     staticMatch?.features ?? [],
-    topics:       staticMatch?.topics   ?? [],
-    badge:        row.badge ?? null,
+    modules:      row.module_count ?? staticMatch?.modules ?? 0,
+    hours:        row.hours        ?? staticMatch?.hours ?? 0,
+    students:     row.student_count ?? staticMatch?.students ?? 0,
+    level:        row.level        ?? staticMatch?.level ?? '',
+    features:     Array.isArray(row.features)    && row.features.length    ? row.features    : (staticMatch?.features ?? []),
+    topics:       Array.isArray(row.topics_list) && row.topics_list.length ? row.topics_list : (staticMatch?.topics   ?? []),
+    badge:        row.badge ?? staticMatch?.badge ?? null,
     _fromDb:      true,
   }
 }
 
 function normalizeDbUniversity(row) {
-  const staticMatch = STATIC_UNIVERSITIES.find(u => u.id === row.slug)
+  const s = STATIC_UNIVERSITIES.find(u => u.id === row.slug)
   return {
     id:          row.slug,
     name:        row.name,
-    shortName:   row.short_name   ?? '',
-    tagline:     staticMatch?.tagline     ?? '',
-    description: row.description  ?? staticMatch?.description ?? '',
-    color:       row.color        ?? staticMatch?.color ?? '#0047AB',
-    accentColor: row.accent_color ?? staticMatch?.accentColor ?? '#f0a500',
-    location:    staticMatch?.location ?? '',
-    icon:        row.icon         ?? staticMatch?.icon ?? '🎓',
+    shortName:   row.short_name  ?? s?.shortName  ?? '',
+    tagline:     row.tagline     ?? s?.tagline     ?? '',
+    description: row.description ?? s?.description ?? '',
+    color:       row.color       ?? s?.color       ?? '#0047AB',
+    accentColor: row.accent_color ?? s?.accentColor ?? '#f0a500',
+    location:    row.location    ?? s?.location    ?? '',
+    icon:        row.icon        ?? s?.icon        ?? '🎓',
     _fromDb:     true,
   }
 }
 
 function normalizeDbInstructor(row, idx) {
-  const staticMatch = STATIC_INSTRUCTORS.find(i => i.id === row.slug)
-  const { gradientFrom, gradientTo } = staticMatch ?? gradientFor(idx)
+  const s = STATIC_INSTRUCTORS.find(i => i.id === row.slug)
+  const from = row.gradient_from ?? s?.gradientFrom ?? gradientFor(idx).gradientFrom
+  const to   = row.gradient_to   ?? s?.gradientTo   ?? gradientFor(idx).gradientTo
   return {
     id:           row.slug,
     name:         row.name,
-    role:         row.role     ?? '',
-    subject:      row.subject  ?? '',
-    photo:        row.photo_url ?? staticMatch?.photo ?? '',
-    initials:     row.initials  ?? row.name.split(' ').map(w => w[0]).join('').slice(0, 2),
-    gradientFrom,
-    gradientTo,
+    role:         row.role     ?? s?.role     ?? '',
+    subject:      row.subject  ?? s?.subject  ?? '',
+    photo:        row.photo_url ?? row.photo  ?? s?.photo ?? '',
+    initials:     row.initials ?? row.name.split(' ').map(w => w[0]).join('').slice(0, 2),
+    gradientFrom: from,
+    gradientTo:   to,
     universities: (row.instructor_universities ?? [])
       .map(iu => iu.university?.short_name)
       .filter(Boolean),
-    rating:       Number(row.rating)   || staticMatch?.rating   || 4.8,
-    students:     Number(row.students) || staticMatch?.students || 0,
-    bio:          row.bio ?? staticMatch?.bio ?? '',
+    rating:       Number(row.rating)    || s?.rating   || 4.8,
+    students:     Number(row.students)  || s?.students || 0,
+    bio:          row.bio ?? s?.bio ?? '',
     _fromDb:      true,
   }
 }
 
-// ── Module-level singleton so multiple useCatalog() calls share one fetch ─────
+// ── Singleton cache — holds resolved data so subsequent mounts are instant ─────
+// Stores { courses, universities, instructors } once fetched, null until then.
+let _cache = null
 let _promise = null
 
 function fetchDbCatalog() {
+  if (_cache)   return Promise.resolve(_cache)
   if (_promise) return _promise
+
   _promise = Promise.all([
-    supabase
-      .from('courses')
+    supabase.from('courses')
       .select('*, university:universities(slug, short_name)')
       .eq('published', true)
       .order('created_at'),
-    supabase
-      .from('universities')
+    supabase.from('universities')
       .select('*')
       .order('position'),
-    supabase
-      .from('instructors')
+    supabase.from('instructors')
       .select('*, instructor_universities(university:universities(short_name))')
       .order('created_at'),
-  ])
+  ]).then(([{ data: dbC, error: ce }, { data: dbU, error: ue }, { data: dbI, error: ie }]) => {
+    const courses      = !ce && dbC?.length ? dbC.map(normalizeDbCourse)      : STATIC_COURSES
+    const universities = !ue && dbU?.length ? dbU.map(normalizeDbUniversity)  : STATIC_UNIVERSITIES
+    const instructors  = !ie && dbI?.length ? dbI.map(normalizeDbInstructor)  : STATIC_INSTRUCTORS
+
+    _cache = { courses, universities, instructors }
+    hydrateCourseCache(courses)
+    return _cache
+  }).catch(() => {
+    const fallback = {
+      courses:      STATIC_COURSES,
+      universities: STATIC_UNIVERSITIES,
+      instructors:  STATIC_INSTRUCTORS,
+    }
+    _cache = fallback
+    hydrateCourseCache(STATIC_COURSES)
+    return fallback
+  })
+
   return _promise
+}
+
+// Expose for dev HMR — Vite calls this when the module is replaced
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => { _cache = null; _promise = null })
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useCatalog() {
-  // Start empty so nothing renders until we know where the data comes from
-  const [courses,      setCourses]      = useState([])
-  const [universities, setUniversities] = useState([])
-  const [instructors,  setInstructors]  = useState([])
-  const [loading,      setLoading]      = useState(true)
+  const [state, setState] = useState(() => {
+    // If cache is already warm (same-session navigation), use it synchronously
+    // so there's zero loading flash on subsequent page visits.
+    if (_cache) return { ..._cache, loading: false }
+    return {
+      courses:      [],
+      universities: [],
+      instructors:  [],
+      loading:      true,
+    }
+  })
 
   useEffect(() => {
-    fetchDbCatalog()
-      .then(([{ data: dbCourses, error: ce }, { data: dbUnis, error: ue }, { data: dbInstructors, error: ie }]) => {
-        const hasDbCourses = !ce && dbCourses?.length > 0
-        const hasDbUnis    = !ue && dbUnis?.length    > 0
-        const hasDbIns     = !ie && dbInstructors?.length > 0
+    // Already warm — nothing to do
+    if (!state.loading) return
 
-        const resolvedCourses      = hasDbCourses ? dbCourses.map(normalizeDbCourse)      : STATIC_COURSES
-        const resolvedUniversities = hasDbUnis    ? dbUnis.map(normalizeDbUniversity)     : STATIC_UNIVERSITIES
-        const resolvedInstructors  = hasDbIns     ? dbInstructors.map(normalizeDbInstructor) : STATIC_INSTRUCTORS
-
-        setCourses(resolvedCourses)
-        setUniversities(resolvedUniversities)
-        setInstructors(resolvedInstructors)
-        hydrateCourseCache(resolvedCourses)
-        setLoading(false)
-      })
-      .catch(() => {
-        // Network failure — fall back to static data so the site still works
-        setCourses(STATIC_COURSES)
-        setUniversities(STATIC_UNIVERSITIES)
-        setInstructors(STATIC_INSTRUCTORS)
-        hydrateCourseCache(STATIC_COURSES)
-        setLoading(false)
-      })
+    fetchDbCatalog().then(({ courses, universities, instructors }) => {
+      setState({ courses, universities, instructors, loading: false })
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return { courses, universities, instructors, loading }
+  return state
 }
