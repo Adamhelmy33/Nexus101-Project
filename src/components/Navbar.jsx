@@ -43,7 +43,15 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handler)
   }, [accountOpen])
 
-  const handleLogout = () => { logout(); navigate('/') }
+  /* Await logout so user state is cleared BEFORE we navigate. Navigating
+     while still logged-in means the OLD protected page re-renders once
+     with user=null mid-animation, which used to white-screen. */
+  const handleLogout = async () => {
+    setAccountOpen(false)
+    setMobileOpen(false)
+    navigate('/', { replace: true })
+    await logout()
+  }
 
   /* ── Logo logic ──
      Home: ALWAYS white logo. Navbar background goes from transparent → dark glass on scroll

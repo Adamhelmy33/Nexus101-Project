@@ -7,6 +7,7 @@ import WhatsAppButton  from './components/WhatsAppButton'
 import ProtectedRoute  from './components/ProtectedRoute'
 import ScrollProgress  from './components/ScrollProgress'
 import BackToTop       from './components/BackToTop'
+import ErrorBoundary   from './components/ErrorBoundary'
 
 import Home            from './pages/Home'
 import Store           from './pages/Store'
@@ -54,6 +55,7 @@ export default function App() {
       {!noNavFooter && <Navbar />}
 
       <AnimatePresence mode="wait" initial={false}>
+        <ErrorBoundary resetKey={location.pathname}>
         <Routes location={location} key={location.pathname}>
 
           {/* ── Public ── */}
@@ -94,6 +96,7 @@ export default function App() {
             </PageTransition>
           } />
         </Routes>
+        </ErrorBoundary>
       </AnimatePresence>
 
       {!noNavFooter && <Footer />}

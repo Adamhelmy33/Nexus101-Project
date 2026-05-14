@@ -82,7 +82,14 @@ export function WalletProvider({ children }) {
     /* Mutations */
     buyBundle, redeem, refresh,
 
-    ready: !!state || !user,
+    /* `ready` means "wallet state is populated and safe to consume".
+       Previously this was `!!state || !user`, which evaluated to true
+       AFTER logout (user becomes null while state is still null) — that
+       let downstream consumers spread a null `state` and read undefined
+       w.balance / w.tier / w.ledger, white-screening the app during the
+       brief AnimatePresence exit window. Treating "no user" as "not
+       ready" keeps every consumer's `if (!w.ready) return null` correct. */
+    ready: !!state,
   }
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>

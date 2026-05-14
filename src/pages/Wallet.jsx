@@ -30,7 +30,11 @@ export default function Wallet() {
   const w = useWallet()
   const [modalOpen, setModalOpen] = useState(false)
 
-  if (!w?.ready) return null
+  /* Belt-and-suspenders: also bail if a critical field is missing.
+     Prevents `w.balance.toLocaleString()` from crashing during the
+     post-logout render window before ProtectedRoute redirects. */
+  if (!w?.ready || w.balance === undefined || !w.tier || !w.ledger) return null
+  if (!user) return null
 
   return (
     <div className="min-h-screen pt-24 pb-16" style={{ background: '#f8faff' }}>

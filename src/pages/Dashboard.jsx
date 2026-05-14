@@ -37,7 +37,11 @@ export default function Dashboard() {
     // eslint-disable-next-line
   }, [user?.email, purchases.length, tick])
 
-  if (!user || !wallet?.ready || !summary) return null
+  /* `wallet.ready` now strictly implies `wallet.balance` etc. exist
+     (see WalletContext fix), but we also bail on missing user so the
+     post-logout render window before ProtectedRoute redirects can't
+     crash on `user.name.split(...)`. */
+  if (!user || !wallet?.ready || wallet.balance === undefined || !summary) return null
 
   const masteredTopics = summary.topicMastery.filter(t => t.mastery >= 0.8).length
   const startedTopics  = summary.topicMastery.filter(t => t.mastery > 0 && t.mastery < 0.8).length
