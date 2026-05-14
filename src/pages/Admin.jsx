@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   DollarSign, Users, Activity, BookOpen, Search, Download,
@@ -9,28 +9,39 @@ import { getAllUsers, getAdminMetrics, getActiveViewers } from '../lib/auth'
 import { COURSES } from '../data/constants'
 import Logo from '../components/Logo'
 
+const EMPTY_METRICS = {
+  totalRevenue: 0, subscriberCount: 0, activeViewers: 0,
+  perCourse: [], totalUsers: 0,
+}
+
 export default function Admin() {
   const { user, logout } = useAuth()
-  const [tick, setTick] = useState(0)   // re-render every 10s for "active viewers"
-  const [search, setSearch]         = useState('')
+  const [allUsers, setAllUsers]       = useState([])
+  const [metrics,  setMetrics]        = useState(EMPTY_METRICS)
+  const [activeViewers, setActive]    = useState([])
+  const [loading, setLoading]         = useState(true)
+  const [search, setSearch]           = useState('')
   const [filterCourse, setFilterCourse] = useState('all')
 
-  /* ── Live refresh ── */
+  /* ── Fetch live data from Supabase, refresh every 10s ── */
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 10_000)
-    return () => clearInterval(id)
+    let alive = true
+    async function fetchAll() {
+      const [users, m] = await Promise.all([getAllUsers(), getAdminMetrics(COURSES)])
+      if (!alive) return
+      setAllUsers(users)
+      setMetrics(m)
+      setActive(getActiveViewers())
+      setLoading(false)
+    }
+    fetchAll()
+    const id = setInterval(fetchAll, 10_000)
+    return () => { alive = false; clearInterval(id) }
   }, [])
 
-  /* ── Crunch numbers ── */
-  const { metrics, allUsers, allPurchases, activeViewers } = useMemo(() => {
-    const allUsers = getAllUsers()
-    const metrics  = getAdminMetrics(COURSES)
-    const allPurchases = allUsers.flatMap(u =>
-      (u.purchases || []).map(p => ({ ...p, email: u.email, name: u.name }))
-    )
-    return { metrics, allUsers, allPurchases, activeViewers: getActiveViewers() }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick])
+  const allPurchases = allUsers.flatMap(u =>
+    (u.purchases || []).map(p => ({ ...p, email: u.email, name: u.name }))
+  )
 
   /* ── Filter user-purchase rows ── */
   const filteredPurchases = allPurchases.filter(p => {

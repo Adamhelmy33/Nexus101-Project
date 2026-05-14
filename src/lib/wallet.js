@@ -22,15 +22,13 @@ import {
   pointsCostFor, recommendedBundleFor, getTierForLifetime, getNextTier,
 } from './pricing'
 import nexusConfig from '../../nexus.config.js'
+import { recordPurchase } from './auth'
 
-const LEDGER_KEY = 'nexus_wallet_ledger'   // append-only history
-const USERS_KEY  = 'nexus_users_db'        // (already used by auth.js)
+const LEDGER_KEY = 'nexus_wallet_ledger'   // append-only history (still local)
 
 /* ── Internal helpers ─────────────────────────────────── */
 function readLedger() { return JSON.parse(localStorage.getItem(LEDGER_KEY) || '[]') }
 function writeLedger(rows) { localStorage.setItem(LEDGER_KEY, JSON.stringify(rows)) }
-function readUsers()  { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]') }
-function writeUsers(users) { localStorage.setItem(USERS_KEY, JSON.stringify(users)) }
 
 /* ── Public read API ──────────────────────────────────── */
 export function getWalletState(userEmail) {
@@ -117,18 +115,11 @@ export function creditWallet({ userEmail, points, paymobTxnId, integration = 'ca
 /* ── Redeem a course (deduct points, record enrollment) ──
    Snapshots the current price into the ledger so historical
    records stay accurate even if config changes. */
-export function redeemCourse({ userEmail, courseId }) {
+export async function redeemCourse({ userEmail, courseId }) {
   const course = findCachedCourse(courseId)
   if (!course) return { ok: false, error: 'Course not found.' }
 
   const purchasePrice = pointsCostFor(course)   // 🔑 snapshot at the moment of purchase
-
-  /* Already enrolled? Block double-buys. */
-  const users = readUsers()
-  const userIdx = users.findIndex(u => u.email === userEmail)
-  if (userIdx === -1) return { ok: false, error: 'User not found.' }
-  const alreadyOwns = (users[userIdx].purchases || []).some(p => p.courseId === courseId)
-  if (alreadyOwns) return { ok: false, error: 'You already own this module.' }
 
   /* Append the spend ledger row (this also enforces sufficient balance) */
   const ledgerRes = appendLedger({
@@ -139,30 +130,32 @@ export function redeemCourse({ userEmail, courseId }) {
     idempotencyKey: `enroll:${userEmail}:${courseId}`,
     meta: {
       courseId,
-      coursePricePoints: purchasePrice,             // historical snapshot
+      coursePricePoints: purchasePrice,
       universityId:      course.universityId,
       exchangeRate:      nexusConfig.exchangeRate,
     },
   })
   if (!ledgerRes.ok) return ledgerRes
 
-  /* Mirror the enrollment into the existing user record. */
-  users[userIdx].purchases.push({
-    courseId,
-    purchasedAt:    new Date().toISOString(),
-    amount:         0,                              // EGP — not used in the points era
-    pointsSpent:    purchasePrice,
-    purchasePrice,                                  // snapshot — same as pointsSpent
-    method:         'wallet',
-    txnId:          ledgerRes.row.id,
+  /* Persist the purchase to Supabase so the Owner Dashboard sees it. */
+  const purchaseRes = await recordPurchase(courseId, {
+    amount:      0,
+    pointsSpent: purchasePrice,
+    method:      'wallet',
+    txnId:       ledgerRes.row.id,
+    meta: {
+      universityId: course.universityId,
+      exchangeRate: nexusConfig.exchangeRate,
+    },
   })
-  writeUsers(users)
+  if (!purchaseRes.ok) return purchaseRes
 
   return {
     ok: true,
     balanceAfter: ledgerRes.balance,
     ledgerId:     ledgerRes.row.id,
     purchasePrice,
+    user:         purchaseRes.user,
   }
 }
 

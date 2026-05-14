@@ -48,9 +48,9 @@ export function WalletProvider({ children }) {
   }, [user, refresh])
 
   /* ── Redeem a course (1-click if balance is sufficient) ── */
-  const redeem = useCallback((courseId) => {
+  const redeem = useCallback(async (courseId) => {
     if (!user) return { ok: false, error: 'Not signed in.' }
-    const res = redeemCourse({ userEmail: user.email, courseId })
+    const res = await redeemCourse({ userEmail: user.email, courseId })
     refresh()
     return res
   }, [user, refresh])

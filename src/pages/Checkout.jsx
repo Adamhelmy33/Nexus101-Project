@@ -48,7 +48,7 @@ export default function Checkout() {
     /* Wallet-first: if balance is sufficient, bypass Paymob entirely. */
     if (!sufficient) { setInsufficientOpen(true); return }
     setBusy(true); setError('')
-    const res = w.redeem(course.id)
+    const res = await w.redeem(course.id)
     setBusy(false)
     if (!res.ok) { setError(res.error); return }
     navigate(`/checkout/${course.id}/success`, {

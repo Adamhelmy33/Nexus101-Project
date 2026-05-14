@@ -1,9 +1,10 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import {
-  initAuthDB, getCurrentUser,
+  getCurrentUser,
   login as doLogin, logout as doLogout, register as doRegister,
   recordPurchase, pingActiveViewer,
 } from '../lib/auth'
+import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
@@ -11,11 +12,22 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [ready, setReady] = useState(false)
 
-  /* ── On mount: load current user ── */
+  /* ── On mount: hydrate from Supabase session, then subscribe to changes ── */
   useEffect(() => {
-    initAuthDB()
-    setUser(getCurrentUser())
-    setReady(true)
+    let alive = true
+    getCurrentUser().then(u => {
+      if (!alive) return
+      setUser(u)
+      setReady(true)
+    })
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!alive) return
+      if (!session?.user) { setUser(null); return }
+      const u = await getCurrentUser()
+      setUser(u)
+    })
+    return () => { alive = false; sub.subscription.unsubscribe() }
   }, [])
 
   /* ── Heartbeat: ping every 30s if logged in ── */
@@ -26,25 +38,25 @@ export function AuthProvider({ children }) {
     return () => clearInterval(id)
   }, [user])
 
-  const login = useCallback((email, password) => {
-    const res = doLogin(email, password)
+  const login = useCallback(async (email, password) => {
+    const res = await doLogin(email, password)
     if (res.ok) setUser(res.user)
     return res
   }, [])
 
-  const register = useCallback((data) => {
-    const res = doRegister(data)
+  const register = useCallback(async (data) => {
+    const res = await doRegister(data)
     if (res.ok) setUser(res.user)
     return res
   }, [])
 
-  const logout = useCallback(() => {
-    doLogout()
+  const logout = useCallback(async () => {
+    await doLogout()
     setUser(null)
   }, [])
 
-  const purchase = useCallback((courseId, paymentMeta) => {
-    const res = recordPurchase(courseId, paymentMeta)
+  const purchase = useCallback(async (courseId, paymentMeta) => {
+    const res = await recordPurchase(courseId, paymentMeta)
     if (res.ok) setUser(res.user)
     return res
   }, [])

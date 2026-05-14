@@ -24,13 +24,17 @@ export default function Login() {
     setBusy(true)
     setError('')
 
-    const fn  = mode === 'login' ? login : register
     const res = mode === 'login'
-      ? login(form.email, form.password)
-      : register(form)
+      ? await login(form.email, form.password)
+      : await register(form)
 
     setBusy(false)
     if (!res.ok) { setError(res.error); return }
+
+    if (res.needsConfirmation) {
+      setError('Check your email to confirm your account before signing in.')
+      return
+    }
 
     // Admin → admin dashboard, everyone else → wherever they came from
     if (res.user.isAdmin) navigate('/admin-nexus', { replace: true })
