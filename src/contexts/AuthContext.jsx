@@ -58,79 +58,66 @@ export function AuthProvider({ children }) {
   const [user, setUser]   = useState(null)
   const [ready, setReady] = useState(false)
 
-  /* Refs that survive across renders without triggering them: */
-  const hydratedIdRef = useRef(null)        // last user id we built a user object for
-  const recoveringRef = useRef(true)        // true until getSession() resolves on mount
+  /* Tracks the user.id we last built a profile for, so onAuthStateChange
+     can skip redundant refetches on TOKEN_REFRESHED / repeat INITIAL_SESSION. */
+  const hydratedIdRef = useRef(null)
 
-  /* ── On mount: recover the persisted session, then subscribe ──
-     supabase-js reads the auth token from localStorage on instantiation
-     but the in-memory session is only populated after getSession() awaits
-     once. Until that happens, onAuthStateChange may briefly fire with
-     INITIAL_SESSION + null even though a valid token exists. We MUST NOT
-     setUser(null) during that window or the UI flickers logged-out. */
+  /* ── Mount: bootstrap auth ──
+     Canonical Supabase pattern:
+       1. Subscribe to onAuthStateChange first (so no event is missed).
+       2. Call getSession() to recover the persisted session from localStorage.
+     Both paths funnel through one applySession() so the user state is
+     always derived from a single source of truth.
+
+     CRITICAL: setReady(true) MUST run in finally so a network failure
+     during profile fetch never leaves the UI stuck on a spinner. */
   useEffect(() => {
     let alive = true
 
-    async function recoverSession() {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (!alive) return
-
-        if (error) {
-          console.warn('[AuthContext] getSession error:', error.message)
-          setUser(null)
-        } else if (!session?.user) {
-          // No persisted session — definitively logged out
-          setUser(null)
-        } else {
-          const u = await buildUserFromAuth(session.user)
-          if (!alive) return
-          setUser(u)
-          hydratedIdRef.current = session.user.id
-        }
-      } catch (err) {
-        console.warn('[AuthContext] recoverSession threw:', err)
-        if (alive) setUser(null)
-      } finally {
-        if (alive) {
-          recoveringRef.current = false
-          setReady(true)
-        }
-      }
-    }
-    recoverSession()
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+    async function applySession(session) {
       if (!alive) return
-
-      // While we're still recovering the persisted session on mount,
-      // ignore null sessions — getSession() is the authoritative source.
-      // Acting on a stale null here is the classic "auto sign-out on
-      // refresh" bug.
-      if (recoveringRef.current && !session?.user) return
-
-      if (!session?.user) {
-        // SIGNED_OUT (or session genuinely expired post-recovery)
-        setUser(null)
-        hydratedIdRef.current = null
-        return
-      }
-
-      // Same user as already loaded — INITIAL_SESSION right after our
-      // own recoverSession(), or a TOKEN_REFRESHED tick. No refetch needed.
-      if (hydratedIdRef.current === session.user.id) return
-
       try {
+        if (!session?.user) {
+          setUser(null)
+          hydratedIdRef.current = null
+          return
+        }
+        // Skip refetch if we already loaded this exact user.
+        if (hydratedIdRef.current === session.user.id) return
+
         const u = await buildUserFromAuth(session.user)
         if (!alive) return
         setUser(u)
         hydratedIdRef.current = session.user.id
       } catch (err) {
-        console.warn('[AuthContext] onAuthStateChange refetch failed:', err)
+        console.warn('[AuthContext] applySession failed:', err)
+      } finally {
+        if (alive) setReady(true)
       }
+    }
+
+    // Subscribe FIRST so no event is missed during the getSession await.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      applySession(session)
     })
 
-    return () => { alive = false; sub.subscription.unsubscribe() }
+    // Recover persisted session — wrapped so a network/storage failure
+    // can never leave `ready` false.
+    ;(async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) console.warn('[AuthContext] getSession error:', error.message)
+        await applySession(session)
+      } catch (err) {
+        console.warn('[AuthContext] getSession threw:', err)
+        if (alive) setReady(true)
+      }
+    })()
+
+    return () => {
+      alive = false
+      sub.subscription.unsubscribe()
+    }
   }, [])
 
   /* ── Heartbeat: ping every 30s if logged in ── */
