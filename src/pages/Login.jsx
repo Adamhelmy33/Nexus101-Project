@@ -24,12 +24,21 @@ export default function Login() {
     setBusy(true)
     setError('')
 
-    const res = mode === 'login'
-      ? await login(form.email, form.password)
-      : await register(form)
+    let res
+    try {
+      res = mode === 'login'
+        ? await login(form.email, form.password)
+        : await register(form)
+    } catch (err) {
+      console.warn('[Login] submit threw:', err)
+      setBusy(false)
+      setError('Something went wrong. Please try again.')
+      return
+    } finally {
+      setBusy(false)
+    }
 
-    setBusy(false)
-    if (!res.ok) { setError(res.error); return }
+    if (!res?.ok) { setError(res?.error || 'Login failed.'); return }
 
     if (res.needsConfirmation) {
       setError('Check your email to confirm your account before signing in.')

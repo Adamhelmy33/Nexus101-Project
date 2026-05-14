@@ -15,10 +15,19 @@ const fadeUp = {
 const stagger = { show: { transition: { staggerChildren: 0.1 } } }
 
 export default function MyCourses() {
-  const { user } = useAuth()
-  const { courses } = useCatalog()
+  const { user, ready } = useAuth()
+  const { courses, loading } = useCatalog()
 
-  const ownedIds  = (user.purchases || []).map(p => p.courseId)
+  if (!ready || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f8faff' }}>
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-primary rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  const purchases = user?.purchases || []
+  const ownedIds  = purchases.map(p => p.courseId)
   const ownedSet  = new Set(ownedIds)
   const owned     = courses.filter(c => ownedSet.has(c.id))
   const notOwned  = courses.filter(c => !ownedSet.has(c.id))
@@ -35,7 +44,7 @@ export default function MyCourses() {
         >
           <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-2">My Learning Portal</p>
           <h1 className="text-4xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Welcome back, {user.name?.split(' ')[0] || 'student'} 👋
+            Welcome back, {user?.name?.split(' ')[0] || 'student'} 👋
           </h1>
           <p className="text-gray-500">
             {owned.length === 0
@@ -76,7 +85,7 @@ export default function MyCourses() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-14"
           >
             {owned.map(course => {
-              const purchase = user.purchases.find(p => p.courseId === course.id)
+              const purchase = purchases.find(p => p.courseId === course.id)
               return (
                 <motion.div
                   key={course.id}
@@ -129,7 +138,7 @@ export default function MyCourses() {
 
                     <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5 mt-auto">
                       <Calendar className="w-3 h-3" />
-                      Purchased {new Date(purchase.purchasedAt).toLocaleDateString()}
+                      Purchased {purchase?.purchasedAt ? new Date(purchase.purchasedAt).toLocaleDateString() : '—'}
                     </p>
 
                     <Link
