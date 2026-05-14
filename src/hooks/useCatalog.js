@@ -92,30 +92,58 @@ function normalizeDbInstructor(row, idx) {
 let _cache = null
 let _promise = null
 
+/* Each table is fetched independently — one failure (e.g. instructors RLS
+   misconfigured) must never wipe the others. The public catalog is anonymous
+   and does NOT depend on the auth session. Settled-results pattern keeps
+   universities/instructors visible even on a logged-out refresh. */
+async function fetchOne(promise, fallback, label) {
+  try {
+    const { data, error } = await promise
+    if (error) {
+      console.warn(`[useCatalog] ${label} fetch error:`, error.message)
+      return fallback
+    }
+    return (data && data.length) ? data : fallback
+  } catch (err) {
+    console.warn(`[useCatalog] ${label} fetch threw:`, err)
+    return fallback
+  }
+}
+
 function fetchDbCatalog() {
   if (_cache)   return Promise.resolve(_cache)
   if (_promise) return _promise
 
   _promise = Promise.all([
-    supabase.from('courses')
-      .select('*, university:universities(slug, short_name)')
-      .eq('published', true)
-      .order('created_at'),
-    supabase.from('universities')
-      .select('*')
-      .order('position'),
-    supabase.from('instructors')
-      .select('*, instructor_universities(university:universities(short_name))')
-      .order('created_at'),
-  ]).then(([{ data: dbC, error: ce }, { data: dbU, error: ue }, { data: dbI, error: ie }]) => {
-    const courses      = !ce && dbC?.length ? dbC.map(normalizeDbCourse)      : STATIC_COURSES
-    const universities = !ue && dbU?.length ? dbU.map(normalizeDbUniversity)  : STATIC_UNIVERSITIES
-    const instructors  = !ie && dbI?.length ? dbI.map(normalizeDbInstructor)  : STATIC_INSTRUCTORS
+    fetchOne(
+      supabase.from('courses')
+        .select('*, university:universities(slug, short_name)')
+        .eq('published', true)
+        .order('created_at'),
+      null, 'courses',
+    ),
+    fetchOne(
+      supabase.from('universities')
+        .select('*')
+        .order('position'),
+      null, 'universities',
+    ),
+    fetchOne(
+      supabase.from('instructors')
+        .select('*, instructor_universities(university:universities(short_name))')
+        .order('created_at'),
+      null, 'instructors',
+    ),
+  ]).then(([dbC, dbU, dbI]) => {
+    const courses      = dbC ? dbC.map(normalizeDbCourse)     : STATIC_COURSES
+    const universities = dbU ? dbU.map(normalizeDbUniversity) : STATIC_UNIVERSITIES
+    const instructors  = dbI ? dbI.map(normalizeDbInstructor) : STATIC_INSTRUCTORS
 
     _cache = { courses, universities, instructors }
     hydrateCourseCache(courses)
     return _cache
-  }).catch(() => {
+  }).catch((err) => {
+    console.warn('[useCatalog] catastrophic failure, using static fallback:', err)
     const fallback = {
       courses:      STATIC_COURSES,
       universities: STATIC_UNIVERSITIES,

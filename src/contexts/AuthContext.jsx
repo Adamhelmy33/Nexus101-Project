@@ -8,8 +8,9 @@ import { supabase } from '../lib/supabase'
 const AuthContext = createContext(null)
 
 /* Build the in-app user object directly from a Supabase session.
-   Kept inline so AuthContext owns the loading lifecycle and any
-   fetch failure can be swallowed without leaving `ready` stuck. */
+   Each query is independently try/catch'd so a failure on one
+   never wipes the whole user. A degraded-but-valid user is always
+   preferable to logging the person out. */
 async function buildUserFromAuth(authUser) {
   let profile = null
   let purchases = []
@@ -56,23 +57,31 @@ async function buildUserFromAuth(authUser) {
 export function AuthProvider({ children }) {
   const [user, setUser]   = useState(null)
   const [ready, setReady] = useState(false)
-  /* Track the currently hydrated user id so we can dedupe redundant
-     re-fetches when onAuthStateChange fires for the same session. */
-  const hydratedIdRef = useRef(null)
 
-  /* ── On mount: hydrate from the persisted session, then subscribe ──
-     Critical: `ready` MUST flip to true regardless of network outcome,
-     or ProtectedRoute will spin forever. */
+  /* Refs that survive across renders without triggering them: */
+  const hydratedIdRef = useRef(null)        // last user id we built a user object for
+  const recoveringRef = useRef(true)        // true until getSession() resolves on mount
+
+  /* ── On mount: recover the persisted session, then subscribe ──
+     supabase-js reads the auth token from localStorage on instantiation
+     but the in-memory session is only populated after getSession() awaits
+     once. Until that happens, onAuthStateChange may briefly fire with
+     INITIAL_SESSION + null even though a valid token exists. We MUST NOT
+     setUser(null) during that window or the UI flickers logged-out. */
   useEffect(() => {
     let alive = true
 
-    async function hydrate() {
+    async function recoverSession() {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
         if (!alive) return
-        if (error || !session?.user) {
+
+        if (error) {
+          console.warn('[AuthContext] getSession error:', error.message)
           setUser(null)
-          hydratedIdRef.current = null
+        } else if (!session?.user) {
+          // No persisted session — definitively logged out
+          setUser(null)
         } else {
           const u = await buildUserFromAuth(session.user)
           if (!alive) return
@@ -80,37 +89,36 @@ export function AuthProvider({ children }) {
           hydratedIdRef.current = session.user.id
         }
       } catch (err) {
-        console.warn('[AuthContext] hydrate failed:', err)
+        console.warn('[AuthContext] recoverSession threw:', err)
         if (alive) setUser(null)
       } finally {
-        if (alive) setReady(true)
+        if (alive) {
+          recoveringRef.current = false
+          setReady(true)
+        }
       }
     }
-    hydrate()
+    recoverSession()
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!alive) return
 
-      // SIGNED_OUT or no session → clear
+      // While we're still recovering the persisted session on mount,
+      // ignore null sessions — getSession() is the authoritative source.
+      // Acting on a stale null here is the classic "auto sign-out on
+      // refresh" bug.
+      if (recoveringRef.current && !session?.user) return
+
       if (!session?.user) {
+        // SIGNED_OUT (or session genuinely expired post-recovery)
         setUser(null)
         hydratedIdRef.current = null
-        setReady(true)
         return
       }
 
-      // INITIAL_SESSION fires right after our own hydrate(). Skip if we
-      // already loaded this user — saves a duplicate Supabase round-trip
-      // and prevents a momentary `null → user` flicker.
-      if (event === 'INITIAL_SESSION' && hydratedIdRef.current === session.user.id) {
-        setReady(true)
-        return
-      }
-
-      // TOKEN_REFRESHED fires periodically — same user, no need to refetch
-      if (event === 'TOKEN_REFRESHED' && hydratedIdRef.current === session.user.id) {
-        return
-      }
+      // Same user as already loaded — INITIAL_SESSION right after our
+      // own recoverSession(), or a TOKEN_REFRESHED tick. No refetch needed.
+      if (hydratedIdRef.current === session.user.id) return
 
       try {
         const u = await buildUserFromAuth(session.user)
@@ -119,8 +127,6 @@ export function AuthProvider({ children }) {
         hydratedIdRef.current = session.user.id
       } catch (err) {
         console.warn('[AuthContext] onAuthStateChange refetch failed:', err)
-      } finally {
-        if (alive) setReady(true)
       }
     })
 
@@ -165,9 +171,6 @@ export function AuthProvider({ children }) {
     return res
   }, [])
 
-  /* Re-pull the user from Supabase. Used after a course purchase so
-     `user.purchases` reflects the new row even if the optimistic
-     update from recordPurchase was lost to an error. */
   const refreshUser = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
