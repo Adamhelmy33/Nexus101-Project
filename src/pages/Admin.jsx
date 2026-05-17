@@ -260,7 +260,7 @@ export default function Admin() {
                           </span>
                         </td>
                         <td className="px-6 py-3.5 text-right">
-                          <span className="font-bold text-primary">{p.amount.toLocaleString()}</span>
+                          <span className="font-bold text-primary">{(p.pointsSpent || p.amount || 0).toLocaleString()}</span>
                           <span className="text-xs text-gray-400 ml-1">EGP</span>
                         </td>
                       </tr>
