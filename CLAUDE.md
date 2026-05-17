@@ -81,3 +81,7 @@ Copy `.env.example` → `.env` and fill in:
 - `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`
 - `BUNNY_*` credentials
 - `VITE_WHATSAPP_NUMBER`, `VITE_SUPPORT_EMAIL`
+
+## Git workflow
+- Always commit and push directly to `main`
+- Do NOT create pull requests or feature branches
