@@ -7,6 +7,7 @@ import WhatsAppButton  from './components/WhatsAppButton'
 import ProtectedRoute  from './components/ProtectedRoute'
 import ScrollProgress  from './components/ScrollProgress'
 import BackToTop       from './components/BackToTop'
+import ScrollToTop     from './components/ScrollToTop'
 import ErrorBoundary   from './components/ErrorBoundary'
 
 import Home            from './pages/Home'
@@ -51,6 +52,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white">
+      <ScrollToTop />
       {!noNavFooter && <ScrollProgress />}
       {!noNavFooter && <Navbar />}
 

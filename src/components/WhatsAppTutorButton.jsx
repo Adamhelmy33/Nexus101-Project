@@ -30,7 +30,7 @@ export default function WhatsAppTutorButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all hover:scale-[1.03] hover:shadow-lg ${sizeClass} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all hover:scale-[1.03] hover:shadow-lg w-full sm:w-auto ${sizeClass} ${className}`}
       style={styles}
     >
       <MessageCircle className="w-4 h-4" />

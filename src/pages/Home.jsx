@@ -189,59 +189,68 @@ export default function Home() {
         {/* ────── HERO ────── */}
         <section
           ref={heroRef}
-          className="relative isolate min-h-screen flex flex-col justify-center overflow-hidden"
-          style={{ background: 'radial-gradient(ellipse at 55% 45%, #0d1e3d 0%, #06101f 100%)' }}
+          className="relative isolate flex flex-col justify-center overflow-hidden"
+          style={{
+            background: 'radial-gradient(ellipse at 55% 45%, #0d1e3d 0%, #06101f 100%)',
+            minHeight: '100svh',
+          }}
         >
           {/* ── Background logo ── */}
           <img
             src="/logo/logo-white.png"
             alt=""
             aria-hidden="true"
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full opacity-[0.13] blur-[2px] object-contain pointer-events-none select-none"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[140%] sm:max-w-full opacity-[0.13] blur-[2px] object-contain pointer-events-none select-none"
             style={{ zIndex: -1 }}
           />
 
           <motion.div style={{ y: heroY, opacity: heroFade }} className="absolute inset-0 pointer-events-none select-none">
-            <div className="animate-float absolute top-20 right-16 w-64 h-64 rounded-full opacity-10"
+            <div className="animate-float absolute top-20 right-4 sm:right-16 w-40 sm:w-64 h-40 sm:h-64 rounded-full opacity-10"
                  style={{ background: 'radial-gradient(circle, #ffffff, transparent)' }} />
-            <div className="animate-float-rev absolute bottom-32 left-10 w-48 h-48 rounded-full opacity-10"
+            <div className="animate-float-rev absolute bottom-32 left-4 sm:left-10 w-32 sm:w-48 h-32 sm:h-48 rounded-full opacity-10"
                  style={{ background: 'radial-gradient(circle, #f0a500, transparent)' }} />
-            <div className="animate-float-slow absolute top-1/2 left-1/3 w-96 h-96 rounded-full opacity-5"
+            <div className="animate-float-slow absolute top-1/2 left-1/3 w-60 sm:w-96 h-60 sm:h-96 rounded-full opacity-5"
                  style={{ background: 'radial-gradient(circle, #ffffff, transparent)' }} />
             <div className="absolute inset-0 opacity-5"
                  style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
           </motion.div>
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
+          <div className="relative w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-24 sm:py-28 md:py-32">
             <div className="max-w-4xl mx-auto text-center">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }}
-                          className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-8">
+                          className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6 sm:mb-8">
                 <Zap className="w-3.5 h-3.5 text-yellow-300" />
-                <span className="text-white/90 text-sm font-medium">High-Intensity University Revisions · Lifetime Access</span>
+                <span className="text-white/90 text-xs sm:text-sm font-medium">High-Intensity University Revisions · Lifetime Access</span>
               </motion.div>
 
-              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7 }}
-                         className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight text-balance">
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.7 }}
+                className="font-bold text-white mb-5 sm:mb-7 md:mb-8 text-balance"
+                style={{ fontSize: 'clamp(2rem, 7vw, 4.5rem)', lineHeight: 1.15 }}
+              >
                 Pass Your <span style={{ color: '#f0a500' }}>University</span> Modules.
                 <br />Excel in your exams.
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.6 }}
-                        className="text-white/75 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+                        className="text-white/75 max-w-2xl mx-auto mb-8 sm:mb-10 md:mb-12 leading-relaxed"
+                        style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.25rem)' }}>
                 Focused, high-intensity revision packages for <strong className="text-white">UH, BUE, and GUC</strong> modules —
                 designed to help you pass and achieve the highest marks.
               </motion.p>
 
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6 }}
-                          className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/store" className="btn-accent text-base px-7 py-3.5">
+                          className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-2 sm:px-0">
+                <Link to="/store" className="btn-accent text-base px-7 py-3.5 w-full sm:w-auto justify-center">
                   <ShoppingCart className="w-4 h-4" /> Browse Modules
                 </Link>
                 <WhatsAppTutorButton size="lg" message="Hi Nexus 101! I'm interested in your revision modules." variant="outline" />
               </motion.div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75, duration: 0.6 }}
-                          className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-6 text-white/60 text-sm">
+                          className="mt-10 sm:mt-14 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-white/60 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
                     {['MN', 'AH', 'SM', 'KT'].map((i, idx) => (

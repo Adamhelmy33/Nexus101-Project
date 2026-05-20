@@ -17,13 +17,13 @@
 
 /* ── Brand colors (extracted from your blue logo) ─ */
 export const BRAND = {
-  blue:      '#0047AB',   // Cobalt / royal blue from logo
-  blueDark:  '#003380',
+  blue: '#0047AB',   // Cobalt / royal blue from logo
+  blueDark: '#003380',
   blueLight: '#1a6fd4',
-  bluePale:  '#e8f0fb',
-  white:     '#ffffff',
-  accent:    '#f0a500',   // Gold accent
-  dark:      '#0a1628',
+  bluePale: '#e8f0fb',
+  white: '#ffffff',
+  accent: '#f0a500',   // Gold accent
+  dark: '#0a1628',
 }
 
 /* ────────────────────────────────────────────────
@@ -90,7 +90,7 @@ export const COURSES = [
     subtitle: 'UH Module — Foundations & Applications',
     icon: '∑',
     gradientFrom: '#003F87',
-    gradientTo:   '#0047AB',
+    gradientTo: '#0047AB',
     price: 899, oldPrice: 1299, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 8, hours: 24, students: 320,
@@ -119,7 +119,7 @@ export const COURSES = [
     subtitle: 'UH Module — Core Programming Concepts',
     icon: '</>',
     gradientFrom: '#0047AB',
-    gradientTo:   '#1a6fd4',
+    gradientTo: '#1a6fd4',
     price: 999, oldPrice: 1399, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 10, hours: 30, students: 280,
@@ -148,7 +148,7 @@ export const COURSES = [
     subtitle: 'UH Module — Logic & Circuits',
     icon: '⚡',
     gradientFrom: '#1a6fd4',
-    gradientTo:   '#003F87',
+    gradientTo: '#003F87',
     price: 899, oldPrice: 1199, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 7, hours: 22, students: 195,
@@ -179,7 +179,7 @@ export const COURSES = [
     subtitle: 'BUE Module — Differential & Integral Calculus',
     icon: '∫',
     gradientFrom: '#7A0019',
-    gradientTo:   '#a30024',
+    gradientTo: '#a30024',
     price: 899, oldPrice: 1299, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 9, hours: 26, students: 240,
@@ -208,7 +208,7 @@ export const COURSES = [
     subtitle: 'BUE Module — Engineering Mechanics',
     icon: '🔧',
     gradientFrom: '#a30024',
-    gradientTo:   '#7A0019',
+    gradientTo: '#7A0019',
     price: 899, oldPrice: 1199, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 8, hours: 24, students: 175,
@@ -237,7 +237,7 @@ export const COURSES = [
     subtitle: 'BUE Module — OOP in C++',
     icon: '💻',
     gradientFrom: '#7A0019',
-    gradientTo:   '#5c0014',
+    gradientTo: '#5c0014',
     price: 999, oldPrice: 1399, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 10, hours: 28, students: 158,
@@ -268,7 +268,7 @@ export const COURSES = [
     subtitle: 'GUC Module — Physics for Engineers',
     icon: '⚛️',
     gradientFrom: '#0066B3',
-    gradientTo:   '#0047AB',
+    gradientTo: '#0047AB',
     price: 899, oldPrice: 1299, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 8, hours: 25, students: 215,
@@ -297,7 +297,7 @@ export const COURSES = [
     subtitle: 'GUC Module — Logic, Sets & Graphs',
     icon: '🧮',
     gradientFrom: '#0066B3',
-    gradientTo:   '#005091',
+    gradientTo: '#005091',
     price: 899, oldPrice: 1199, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 7, hours: 22, students: 188,
@@ -326,7 +326,7 @@ export const COURSES = [
     subtitle: 'GUC Module — Core CS Foundations',
     icon: '🗂️',
     gradientFrom: '#005091',
-    gradientTo:   '#0066B3',
+    gradientTo: '#0066B3',
     price: 1099, oldPrice: 1499, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 12, hours: 32, students: 152,
@@ -357,7 +357,7 @@ export const COURSES = [
     subtitle: 'Coventry Module — Core Programming with Python',
     icon: '💻',
     gradientFrom: '#dc2626',
-    gradientTo:   '#991b1b',
+    gradientTo: '#991b1b',
     price: 850, oldPrice: 1199, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 9, hours: 26, students: 140,
@@ -386,7 +386,7 @@ export const COURSES = [
     subtitle: 'Coventry Module — Calculus, Algebra & Stats',
     icon: '∑',
     gradientFrom: '#991b1b',
-    gradientTo:   '#7f1d1d',
+    gradientTo: '#7f1d1d',
     price: 850, oldPrice: 1199, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 8, hours: 24, students: 125,
@@ -415,7 +415,7 @@ export const COURSES = [
     subtitle: 'Coventry Module — TCP/IP, Routing & Protocols',
     icon: '🌐',
     gradientFrom: '#dc2626',
-    gradientTo:   '#7f1d1d',
+    gradientTo: '#7f1d1d',
     price: 950, oldPrice: 1299, currency: 'EGP',
     duration: 'Lifetime access',
     modules: 10, hours: 28, students: 95,
@@ -453,7 +453,7 @@ export const FOUNDERS = [
     photo: '/founders/farag.jpg',           // ← place your photo here
     initials: 'MF',
     gradientFrom: '#0047AB',
-    gradientTo:   '#003380',
+    gradientTo: '#003380',
     bio: 'Co-founder of Nexus 101. On a mission to help every Egyptian university student pass their hardest modules with confidence.',
     quote: '"Every student deserves a clear path to passing — without burning out."',
     achievements: [
@@ -474,7 +474,7 @@ export const FOUNDERS = [
     photo: '/founders/nagdy.jpg',
     initials: 'MN',
     gradientFrom: '#003F87',
-    gradientTo:   '#0066B3',
+    gradientTo: '#0066B3',
     bio: 'Co-founder of Nexus 101. Specialist in physics and Computer Science revisions with an obsession for crystal-clear explanations.',
     quote: '"The right revision turns confusion into a passing grade."',
     achievements: [
@@ -501,8 +501,19 @@ export const TEAM = [
     photo: '/team/yehia.jpg',                 // ← place his photo here
     initials: 'YA',
     gradientFrom: '#f0a500',
-    gradientTo:   '#d4920a',
+    gradientTo: '#d4920a',
     bio: 'The eye behind every visual on Nexus 101 — from the logo and brand identity to course thumbnails. Yehia turns our mission into the brand students recognise.',
+  },
+  {
+    id: 'adam',
+    name: 'Adam Helmy',
+    role: 'Web Developer',
+    department: 'Platform Development & Systems',
+    photo: '/team/adam.jpg',
+    initials: 'AH',
+    gradientFrom: '#0047AB',
+    gradientTo: '#1a6fd4',
+    bio: 'Web developer focused on building and improving the Nexus 101 platform experience, frontend systems, and scalable educational infrastructure.',
   },
 ]
 
@@ -588,32 +599,32 @@ export const INSTRUCTORS = [
 
 /* ── Stats shown on homepage ───────────────────── */
 export const STATS = [
-  { id: 'students',     label: 'Students Helped',  value: 2000, suffix: '+', description: 'and counting' },
-  { id: 'hours',        label: 'Revision Hours',    value: 500,  suffix: '+', description: 'of expert teaching' },
-  { id: 'success',      label: 'Pass Rate',         value: 98,   suffix: '%', description: 'students pass their modules' },
-  { id: 'universities', label: 'Target Universities', value: 3, suffix: '',   description: 'UH · BUE · GUC' },
+  { id: 'students', label: 'Students Helped', value: 2000, suffix: '+', description: 'and counting' },
+  { id: 'hours', label: 'Revision Hours', value: 500, suffix: '+', description: 'of expert teaching' },
+  { id: 'success', label: 'Pass Rate', value: 98, suffix: '%', description: 'students pass their modules' },
+  { id: 'universities', label: 'Target Universities', value: 3, suffix: '', description: 'UH · BUE · GUC' },
 ]
 
 /* ── Contact ──────────────────────────────────── */
-export const WHATSAPP_NUMBER       = '201223262295'   // ← change to your real number
+export const WHATSAPP_NUMBER = '201223262295'   // ← change to your real number
 export const WHATSAPP_TUTOR_NUMBER = '201223262295'   // ← can be the same or a separate tutor line
-export const SUPPORT_EMAIL         = 'mathsphys101@gmail.com'
+export const SUPPORT_EMAIL = 'mathsphys101@gmail.com'
 
 /* ── Demo accounts (seed the localStorage DB) ─── */
 export const SEED_USERS = [
   {
-    email:    'admin@nexus101.com',
+    email: 'admin@nexus101.com',
     password: 'nexus2025',                 // ← change before going live!
-    name:     'Admin',
-    isAdmin:  true,
+    name: 'Admin',
+    isAdmin: true,
     purchases: [],
     registeredAt: '2025-01-01T00:00:00.000Z',
   },
   {
-    email:    'demo@student.com',
+    email: 'demo@student.com',
     password: 'demo123',
-    name:     'Demo Student',
-    isAdmin:  false,
+    name: 'Demo Student',
+    isAdmin: false,
     purchases: [],
     registeredAt: '2025-01-15T00:00:00.000Z',
   },

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   Linkedin, Twitter, BookOpen, ArrowRight, Star, Award,
-  GraduationCap, Palette, Users,
+  GraduationCap, Palette, Users, Code2,
 } from 'lucide-react'
 import Avatar from '../components/Avatar'
 import { FOUNDERS, TEAM } from '../data/constants'
@@ -32,9 +32,10 @@ function FounderCard({ founder }) {
           name={founder.name}
           gradientFrom="rgba(255,255,255,0.2)"
           gradientTo="rgba(255,255,255,0.1)"
-          size={140}
+          size={150}
           rounded="rounded-full"
-          className="relative z-10"
+          objectPosition="center 20%"
+          className="relative z-10 ring-4 ring-white/80 shadow-2xl"
         />
         <div className="flex items-center gap-1 mt-4 relative z-10">
           {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />)}
@@ -103,28 +104,58 @@ function FounderCard({ founder }) {
 
 /* ─── Team / designer card ────────────────────── */
 function TeamMemberCard({ member }) {
+  const RoleIcon = member.role.toLowerCase().includes('developer') ? Code2 : Palette
   return (
-    <motion.div variants={fadeUp}
-                whileHover={{ y: -4 }}
-                className="rounded-2xl bg-white shadow-md border border-gray-100 p-6 flex flex-col items-center text-center transition-shadow hover:shadow-xl">
-      <Avatar
-        photo={member.photo}
-        initials={member.initials}
-        name={member.name}
-        gradientFrom={member.gradientFrom}
-        gradientTo={member.gradientTo}
-        size={96}
-        rounded="rounded-2xl"
-        className="mb-4"
-      />
-      <h3 className="font-bold text-gray-900 mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
-        {member.name}
-      </h3>
-      <p className="text-xs font-semibold text-primary mb-1 uppercase tracking-wider flex items-center gap-1.5">
-        <Palette className="w-3 h-3" /> {member.role}
-      </p>
-      <p className="text-xs text-gray-400 mb-3">{member.department}</p>
-      <p className="text-sm text-gray-500 leading-relaxed">{member.bio}</p>
+    <motion.div
+      variants={fadeUp}
+      whileHover={{ y: -4 }}
+      className="rounded-2xl bg-white shadow-md border border-gray-100 flex flex-col transition-shadow hover:shadow-xl"
+    >
+      {/* ── Compact gradient banner ── */}
+      <div
+        className="relative h-24 flex-shrink-0 rounded-t-2xl overflow-hidden"
+        style={{ background: `linear-gradient(135deg, ${member.gradientFrom}, ${member.gradientTo})` }}
+      >
+        <div
+          className="absolute inset-0 opacity-15"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+        <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white/10" />
+      </div>
+
+      {/* ── Body — avatar gently overlapping the banner ── */}
+      <div className="relative z-10 px-5 pb-5 pt-0 -mt-12 flex flex-col items-center text-center flex-1">
+        <Avatar
+          photo={member.photo}
+          initials={member.initials}
+          name={member.name}
+          gradientFrom={member.gradientFrom}
+          gradientTo={member.gradientTo}
+          size={96}
+          rounded="rounded-full"
+          objectPosition="center 30%"
+          className="mb-3 ring-4 ring-white shadow-xl"
+        />
+        <h3 className="font-bold text-gray-900 text-base leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+          {member.name}
+        </h3>
+        <p className="text-xs font-semibold text-primary uppercase tracking-wider mt-0.5">
+          {member.role}
+        </p>
+        <p className="text-xs text-gray-400 mb-3">{member.department}</p>
+        <p className="text-sm text-gray-600 leading-relaxed mb-4 flex-1">{member.bio}</p>
+
+        {/* ── Footer strip ── */}
+        <div className="flex items-center justify-center gap-2 text-xs pt-3 border-t border-gray-100 w-full">
+          <RoleIcon className="w-3.5 h-3.5 text-primary" />
+          <span className="font-semibold text-gray-700">Nexus 101</span>
+          <span className="text-gray-300">·</span>
+          <span className="text-gray-500">Core Team</span>
+        </div>
+      </div>
     </motion.div>
   )
 }
@@ -135,10 +166,11 @@ function InstructorCard({ ins }) {
     <motion.div variants={fadeUp}
                 whileHover={{ y: -4 }}
                 className="rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden flex flex-col transition-shadow hover:shadow-xl">
-      <div className="relative h-32 flex items-end p-4 overflow-hidden"
+      <div className="relative h-36 flex items-end p-4 overflow-hidden"
            style={{ background: `linear-gradient(135deg, ${ins.gradientFrom}, ${ins.gradientTo})` }}>
         <div className="absolute inset-0 opacity-15"
              style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10" />
         <div className="flex flex-wrap gap-1 relative z-10">
           {ins.universities.map(u => (
             <span key={u} className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md backdrop-blur-sm text-white"
@@ -149,16 +181,17 @@ function InstructorCard({ ins }) {
         </div>
       </div>
 
-      <div className="p-5 -mt-12 flex flex-col items-center text-center">
+      <div className="relative z-10 p-5 -mt-14 flex flex-col items-center text-center">
         <Avatar
           photo={ins.photo}
           initials={ins.initials}
           name={ins.name}
           gradientFrom={ins.gradientFrom}
           gradientTo={ins.gradientTo}
-          size={88}
+          size={100}
           rounded="rounded-full"
-          className="mb-3"
+          objectPosition="center 30%"
+          className="mb-3 ring-4 ring-white shadow-xl"
         />
         <h3 className="font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
           {ins.name}
@@ -188,22 +221,22 @@ export default function Team() {
   return (
     <div>
       {/* ── Hero ── */}
-      <div className="pt-28 pb-16 text-center relative overflow-hidden"
+      <div className="pt-36 sm:pt-28 pb-16 text-center relative overflow-hidden"
            style={{ background: 'linear-gradient(135deg, #0a1628 0%, #003380 60%, #0047AB 100%)' }}>
         <div className="absolute inset-0 opacity-5"
              style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
         <div className="relative max-w-3xl mx-auto px-4">
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                    className="text-primary-light font-semibold text-sm uppercase tracking-widest mb-4">
+                    className="text-primary-light font-semibold text-xs sm:text-sm uppercase tracking-widest mb-4">
             The People
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                     className="text-4xl sm:text-5xl font-bold text-white mb-4"
+                     className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4"
                      style={{ fontFamily: 'Playfair Display, serif' }}>
             Meet the Team
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="text-white/65 text-lg">
+                    className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
             Two founders, six instructors, one mission — your university success.
           </motion.p>
         </div>
@@ -249,9 +282,9 @@ export default function Team() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden animate-pulse">
-                  <div className="h-32 bg-gray-200" />
+                  <div className="h-36 bg-gray-200" />
                   <div className="p-5 flex flex-col items-center gap-3">
-                    <div className="w-20 h-20 rounded-full bg-gray-200 -mt-16" />
+                    <div className="w-24 h-24 rounded-full bg-gray-200 -mt-16" />
                     <div className="h-4 w-32 bg-gray-200 rounded" />
                     <div className="h-3 w-24 bg-gray-100 rounded" />
                     <div className="h-3 w-full bg-gray-100 rounded" />

@@ -54,22 +54,22 @@ export default function Contact() {
   return (
     <div>
       {/* ── Hero ── */}
-      <div className="pt-28 pb-16 text-center relative overflow-hidden"
+      <div className="pt-36 sm:pt-28 pb-16 text-center relative overflow-hidden"
            style={{ background: 'linear-gradient(135deg, #0a1628 0%, #003380 60%, #0047AB 100%)' }}>
         <div className="absolute inset-0 opacity-5"
              style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
         <div className="relative max-w-3xl mx-auto px-4">
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                    className="text-primary-light font-semibold text-sm uppercase tracking-widest mb-4">
+                    className="text-primary-light font-semibold text-xs sm:text-sm uppercase tracking-widest mb-4">
             Talk to Us
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                     className="text-4xl sm:text-5xl font-bold text-white mb-4"
+                     className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4"
                      style={{ fontFamily: 'Playfair Display, serif' }}>
             Get in Touch
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="text-white/65 text-lg">
+                    className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
             Questions about a module, payment, or your university? We're here.
           </motion.p>
         </div>

@@ -197,7 +197,7 @@ export default function Store() {
   return (
     <div>
       {/* ── Hero ── */}
-      <div className="pt-28 pb-16 text-center relative overflow-hidden"
+      <div className="pt-36 sm:pt-28 pb-16 text-center relative overflow-hidden"
            style={{ background: 'linear-gradient(135deg, #0a1628 0%, #003380 60%, #0047AB 100%)' }}>
         <div className="absolute inset-0 opacity-5"
              style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
@@ -208,12 +208,12 @@ export default function Store() {
             <span className="text-white/90 text-xs font-medium">Lifetime access · 7-day money-back guarantee</span>
           </motion.div>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                     className="text-4xl sm:text-5xl font-bold text-white mb-4"
+                     className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4"
                      style={{ fontFamily: 'Playfair Display, serif' }}>
             Revision Modules Store
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="text-white/65 text-lg">
+                    className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
             High-intensity revisions for UH, BUE, GUC, Coventry and Medicine modules.
           </motion.p>
         </div>
