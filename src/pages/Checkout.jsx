@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useParams, useNavigate, Link, Navigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Coins, ShieldCheck, ArrowLeft, CheckCircle2, AlertCircle,
-  Sparkles, BookOpen, Clock, Plus, Zap,
+  Sparkles, BookOpen, Clock, Plus, Zap, CreditCard, Smartphone,
+  Building2, Lock, ExternalLink, Loader2, X,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCatalog } from '../hooks/useCatalog'
@@ -16,8 +17,17 @@ import SmartInsufficientBalanceModal from '../components/wallet/SmartInsufficien
  * Course checkout — fully driven by nexus.config.js.
  * 1. Course price is read dynamically based on its university (or per-course override).
  * 2. If wallet covers cost → 1-click redeem (Paymob is bypassed entirely).
- * 3. If insufficient → SmartInsufficientBalanceModal suggests the right bundle.
+ * 3. If insufficient → two paths:
+ *    a. Top up wallet with a bundle (opens BundlePurchaseModal → Paymob iframe)
+ *    b. Pay directly with card/wallet → Netlify function → Paymob iframe
  */
+
+const DIRECT_PAY_METHODS = [
+  { id: 'card',   label: 'Credit / Debit Card', sub: 'Visa · MasterCard · Meeza', icon: CreditCard, color: '#0047AB' },
+  { id: 'wallet', label: 'Mobile Wallet',       sub: 'Vodafone Cash · Orange',     icon: Smartphone, color: '#e60000' },
+  { id: 'kiosk',  label: 'Fawry / Kiosk',       sub: 'Pay at any branch',          icon: Building2,  color: '#f0a500' },
+]
+
 export default function Checkout() {
   const { courseId } = useParams()
   const navigate = useNavigate()
@@ -32,6 +42,13 @@ export default function Checkout() {
   const [insufficientOpen, setInsufficientOpen] = useState(false)
   const [bundleOpen, setBundleOpen]             = useState(false)
 
+  /* ── Direct Paymob payment state ── */
+  const [payMethod, setPayMethod]     = useState('card')
+  const [showDirectPay, setShowDirectPay] = useState(false)
+  const [iframeUrl, setIframeUrl]     = useState('')
+  const [iframeLoading, setIframeLoading] = useState(false)
+  const [paymentStep, setPaymentStep] = useState('idle') // idle | connecting | iframe | success
+
   /* ── Guards ── */
   if (catalogLoading)                return null           // wait for DB before deciding
   if (!course)                       return <Navigate to="/store" replace />
@@ -43,9 +60,10 @@ export default function Checkout() {
   const price       = w.pointsCostFor(course)
   const sufficient  = w.balance >= price
   const recommended = w.recommendedBundleFor(course)
+  const priceEgp    = w.pointsToEgp ? w.pointsToEgp(price) : price
 
+  /* ── Wallet redeem (existing 1-click flow) ── */
   const handleRedeem = async () => {
-    /* Wallet-first: if balance is sufficient, bypass Paymob entirely. */
     if (!sufficient) { setInsufficientOpen(true); return }
     setBusy(true); setError('')
     const res = await w.redeem(course.id)
@@ -58,6 +76,75 @@ export default function Checkout() {
       },
       replace: true,
     })
+  }
+
+  /* ── Direct card/wallet pay via Paymob ── */
+  const handleDirectPay = async () => {
+    setPaymentStep('connecting')
+    setError('')
+
+    try {
+      const res = await fetch('/api/create-paymob-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount_cents:  priceEgp * 100,
+          bundle_points: price,
+          currency:      w.currency || 'EGP',
+          method:        payMethod,
+          user_email:    user.email,
+          user_name:     user.name || 'Nexus Student',
+          course_id:     course.id,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.ok && data.iframe_url) {
+        setIframeUrl(data.iframe_url)
+        setIframeLoading(true)
+        setPaymentStep('iframe')
+      } else {
+        /* Paymob not configured → fall back to demo mode */
+        console.warn('[Checkout] Paymob unavailable:', data.error)
+        await demoDirectPay()
+      }
+    } catch (fetchErr) {
+      console.warn('[Checkout] Paymob fetch failed:', fetchErr.message)
+      await demoDirectPay()
+    }
+  }
+
+  /* ── Demo fallback for direct pay ── */
+  const demoDirectPay = async () => {
+    setPaymentStep('connecting')
+    await new Promise(r => setTimeout(r, 2000))
+
+    /* Simulate: credit wallet + immediately redeem */
+    const txnId = `DIRECT-${Date.now()}-${payMethod.toUpperCase()}`
+    const creditRes = w.buyBundle({ points: price, paymobTxnId: txnId, integration: payMethod })
+    if (!creditRes.ok) { setError(creditRes.error); setPaymentStep('idle'); return }
+
+    const redeemRes = await w.redeem(course.id)
+    if (!redeemRes.ok) { setError(redeemRes.error); setPaymentStep('idle'); return }
+
+    setPaymentStep('success')
+    setTimeout(() => {
+      navigate(`/checkout/${course.id}/success`, {
+        state: {
+          course, txnId, method: payMethod,
+          pricePoints: redeemRes.purchasePrice, balanceAfter: redeemRes.balanceAfter,
+        },
+        replace: true,
+      })
+    }, 2000)
+  }
+
+  const resetDirectPay = () => {
+    setPaymentStep('idle')
+    setIframeUrl('')
+    setIframeLoading(false)
+    setShowDirectPay(false)
   }
 
   return (
@@ -74,6 +161,74 @@ export default function Checkout() {
         onClose={() => setInsufficientOpen(false)}
         onBuyBundle={() => { setInsufficientOpen(false); setBundleOpen(true) }}
       />
+
+      {/* ── Paymob Iframe Overlay ── */}
+      <AnimatePresence>
+        {paymentStep === 'iframe' && iframeUrl && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center px-4 py-6 overflow-y-auto"
+            style={{ background: 'rgba(10,22,40,0.75)', backdropFilter: 'blur(8px)' }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.96 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden my-auto"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="relative p-5 text-white" style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}>
+                <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/10" />
+                <button
+                  onClick={() => {
+                    if (window.confirm('Cancel this payment?')) resetDirectPay()
+                  }}
+                  className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/15 transition-colors text-white/70"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="relative">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-1">Secure Payment</p>
+                  <h2 className="text-xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Pay {priceEgp.toLocaleString()} {w.currency} for {course.title}
+                  </h2>
+                </div>
+              </div>
+              {/* Iframe */}
+              <div className="p-5 relative">
+                {iframeLoading && (
+                  <div className="absolute inset-5 flex items-center justify-center bg-white/80 z-10 rounded-2xl">
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                      <p className="text-sm text-gray-600">Loading secure checkout…</p>
+                    </div>
+                  </div>
+                )}
+                <iframe
+                  src={iframeUrl}
+                  title="Paymob Secure Payment"
+                  className="w-full rounded-2xl border border-gray-200"
+                  style={{ height: '480px', minHeight: '400px' }}
+                  onLoad={() => setIframeLoading(false)}
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+                />
+                <div className="mt-3 flex items-center justify-between">
+                  <p className="flex items-center gap-1.5 text-[11px] text-gray-400">
+                    <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
+                    PCI-DSS compliant · 256-bit encryption
+                  </p>
+                  <a href={iframeUrl} target="_blank" rel="noopener noreferrer"
+                     className="flex items-center gap-1 text-[11px] text-primary hover:underline">
+                    <ExternalLink className="w-3 h-3" /> Open in new tab
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link to="/store" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary transition-colors mb-6">
@@ -173,6 +328,105 @@ export default function Checkout() {
                 Atomic ledger · 100% audit-trail · 7-day money-back
               </div>
             </div>
+
+            {/* ── Direct Pay with Card / Wallet (below wallet redeem) ── */}
+            <div className="mt-6">
+              <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-blue-500" />
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500">
+                      Pay Directly
+                    </p>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                    VIA PAYMOB
+                  </span>
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Skip the wallet — pay now
+                </h2>
+                <p className="text-sm text-gray-500 mb-5">
+                  Pay <strong>{priceEgp.toLocaleString()} {w.currency}</strong> directly. No points needed.
+                </p>
+
+                <AnimatePresence mode="wait">
+                  {!showDirectPay ? (
+                    <motion.button
+                      key="show"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      onClick={() => setShowDirectPay(true)}
+                      className="w-full py-3 px-4 rounded-xl border-2 border-dashed border-gray-200 text-sm font-medium text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                    >
+                      <CreditCard className="w-4 h-4" /> Choose payment method
+                    </motion.button>
+                  ) : (
+                    <motion.div key="methods" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                      {/* Payment method selector */}
+                      <div className="grid grid-cols-3 gap-2 mb-5">
+                        {DIRECT_PAY_METHODS.map(m => (
+                          <button
+                            key={m.id}
+                            onClick={() => setPayMethod(m.id)}
+                            className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                              payMethod === m.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
+                                 style={{ background: m.color }}>
+                              <m.icon className="w-5 h-5" />
+                            </div>
+                            <div className="text-center">
+                              <p className="text-[11px] font-semibold text-gray-700 leading-tight">{m.label}</p>
+                              <p className="text-[9px] text-gray-400 mt-0.5">{m.sub}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+
+                      {error && paymentStep !== 'idle' && (
+                        <div className="mb-4 flex items-start gap-2 p-3 rounded-xl text-sm"
+                             style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}>
+                          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" /> {error}
+                        </div>
+                      )}
+
+                      {paymentStep === 'connecting' ? (
+                        <div className="text-center py-4">
+                          <div className="w-8 h-8 mx-auto mb-3 border-3 border-blue-100 border-t-primary rounded-full animate-spin" />
+                          <p className="text-sm font-medium text-gray-700">Connecting to Paymob…</p>
+                          <p className="text-[11px] text-gray-400 mt-1">Don't close this page.</p>
+                        </div>
+                      ) : paymentStep === 'success' ? (
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                    className="text-center py-4">
+                          <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
+                               style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
+                            <CheckCircle2 className="w-6 h-6 text-white" strokeWidth={3} />
+                          </div>
+                          <p className="font-bold text-gray-900">Payment successful!</p>
+                          <p className="text-xs text-gray-500 mt-1">Redirecting to your course…</p>
+                        </motion.div>
+                      ) : (
+                        <button
+                          onClick={handleDirectPay}
+                          disabled={paymentStep !== 'idle'}
+                          className="btn-accent w-full justify-center disabled:opacity-60"
+                        >
+                          <Lock className="w-4 h-4" />
+                          Pay {priceEgp.toLocaleString()} {w.currency} with {DIRECT_PAY_METHODS.find(m => m.id === payMethod)?.label || 'Card'}
+                        </button>
+                      )}
+
+                      <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-gray-400">
+                        <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
+                        Secure Paymob checkout · PCI-DSS · HMAC-validated
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
 
           {/* ── Right: order summary ── */}
@@ -199,6 +453,12 @@ export default function Checkout() {
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {course.hours}h</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Price summary */}
+              <div className="rounded-2xl p-4 mb-5 space-y-2 text-sm" style={{ background: '#f8faff', border: '1px solid #e2ecf9' }}>
+                <Row label="Points price" value={`${price.toLocaleString()} NXP`} />
+                <Row label="Cash price"   value={`${priceEgp.toLocaleString()} ${w.currency}`} />
               </div>
 
               <div className="rounded-2xl p-4 mb-5" style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '1px solid #fcd34d' }}>

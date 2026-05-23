@@ -44,3 +44,9 @@
 
 [functions."build-custom-playlist"]
   timeout = 26
+
+[functions."create-paymob-order"]
+  timeout = 10
+
+[functions."paymob-webhook"]
+  timeout = 10
