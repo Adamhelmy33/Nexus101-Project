@@ -5,7 +5,6 @@ import {
   Sparkles, ArrowLeft, Play, CheckCircle2, Clock,
   ChevronRight, Lock, Tag, ListVideo, Pause,
 } from 'lucide-react'
-import BunnyVideoPlayer from '../components/video/BunnyVideoPlayer'
 import { useAuth } from '../contexts/AuthContext'
 import { getPlaylistById } from '../lib/customCourse'
 import { COURSES, UNIVERSITIES } from '../data/constants'
@@ -67,28 +66,27 @@ export default function CustomCoursePlayer() {
         <main className="overflow-y-auto">
           {active ? (
             <>
-              <BunnyVideoPlayer
-                key={active.segment.id}                /* remount when switching segment */
-                videoId={active.segment.videoId}
-                courseId={active.segment.courseId}
-                fallbackUrl={active.segment.hlsUrl}
-                user={user}
-                title={active.segment.title}
-                startAt={active.segment.start_sec}
-                stopAt={active.segment.end_sec}
-                onSegmentEnd={playNext}
-                onWatchedSeconds={(delta) => recordWatch({
-                  userEmail: user.email,
-                  courseId:  active.segment.courseId,
-                  moduleId:  active.segment.id,
-                  seconds:   delta,
-                })}
-                chapters={items.map(i => ({
-                  start_sec: i.segment.start_sec - active.segment.start_sec,  // relative for now
-                  end_sec:   i.segment.end_sec   - active.segment.start_sec,
-                  title:     i.segment.title,
-                })).filter(c => c.start_sec >= 0)}
-              />
+              <div className="w-full bg-black">
+                {active.segment.youtube_video_id ? (
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      key={active.segment.youtube_video_id}
+                      src={`https://www.youtube.com/embed/${active.segment.youtube_video_id}`}
+                      title={active.segment.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full border-0"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                      <Play className="w-12 h-12 text-white/20" />
+                      <p className="text-white/40 text-sm font-medium">Video coming soon</p>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 text-white">
                 <div className="flex items-center gap-2 mb-2">

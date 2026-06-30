@@ -21,7 +21,6 @@ import MyCourses       from './pages/MyCourses'
 import CourseViewer    from './pages/CourseViewer'
 import Admin           from './pages/Admin'
 import Dashboard       from './pages/Dashboard'
-import Wallet          from './pages/Wallet'
 import CustomCourseBuilder from './pages/CustomCourseBuilder'
 import CustomCoursePlayer  from './pages/CustomCoursePlayer'
 
@@ -76,8 +75,7 @@ export default function App() {
           <Route path="/checkout/:courseId/success"  element={<ProtectedRoute><PageTransition><CheckoutSuccess /></PageTransition></ProtectedRoute>} />
           <Route path="/my-courses"                  element={<ProtectedRoute><PageTransition><MyCourses /></PageTransition></ProtectedRoute>} />
           <Route path="/dashboard"                   element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
-          <Route path="/wallet"                      element={<ProtectedRoute><PageTransition><Wallet /></PageTransition></ProtectedRoute>} />
-          <Route path="/custom-course"               element={<ProtectedRoute><PageTransition><CustomCourseBuilder /></PageTransition></ProtectedRoute>} />
+<Route path="/custom-course"               element={<ProtectedRoute><PageTransition><CustomCourseBuilder /></PageTransition></ProtectedRoute>} />
           <Route path="/custom-course/:playlistId"   element={<ProtectedRoute><CustomCoursePlayer /></ProtectedRoute>} />
           <Route path="/learn/:courseId"             element={<ProtectedRoute><CourseViewer /></ProtectedRoute>} />
 

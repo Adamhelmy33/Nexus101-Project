@@ -237,7 +237,7 @@ export default function Home() {
               <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.6 }}
                         className="text-white/75 max-w-2xl mx-auto mb-8 sm:mb-10 md:mb-12 leading-relaxed"
                         style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.25rem)' }}>
-                Focused, high-intensity revision packages for <strong className="text-white">UH, BUE, and GUC</strong> modules —
+                Focused, high-intensity revision packages for <strong className="text-white">University of Hertfordshire</strong> modules —
                 designed to help you pass and achieve the highest marks.
               </motion.p>
 
@@ -351,20 +351,20 @@ export default function Home() {
             <Section>
               <motion.div variants={fadeUp} className="text-center mb-12">
                 <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-                  <GraduationCap className="w-4 h-4" /> 3 Target Universities
+                  <GraduationCap className="w-4 h-4" /> Our University
                 </p>
                 <h2 className="text-4xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Built for your university,<br />
                   <span className="gradient-text">aligned with your modules.</span>
                 </h2>
                 <p className="text-gray-500 text-lg max-w-xl mx-auto">
-                  Every revision is mapped to the exact syllabus of your university — no wasted hours.
+                  Every revision is mapped to the exact UH syllabus — no wasted hours.
                 </p>
               </motion.div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {loading
-                  ? [...Array(3)].map((_, i) => (
+                  ? [...Array(1)].map((_, i) => (
                       <div key={i} className="rounded-3xl overflow-hidden bg-white shadow-md border border-gray-100 animate-pulse">
                         <div className="h-48 bg-gray-200" />
                         <div className="p-6 space-y-3">
@@ -378,12 +378,6 @@ export default function Home() {
                   : universities.map((uni, idx) => <UniversityCard key={uni.id} uni={uni} idx={idx} courses={courses} />)
                 }
               </div>
-
-              <motion.div variants={fadeUp} className="text-center mt-10">
-                <Link to="/store" className="btn-primary">
-                  Browse all modules <ArrowRight className="w-4 h-4" />
-                </Link>
-              </motion.div>
             </Section>
           </div>
         </section>
@@ -400,13 +394,13 @@ export default function Home() {
                   Learn from <span className="gradient-text">expert tutors</span>
                 </h2>
                 <p className="text-gray-500 text-lg max-w-xl mx-auto">
-                  Six specialists. Each obsessed with one thing: getting you a passing grade.
+                  Five specialists. Each obsessed with one thing: getting you a passing grade.
                 </p>
               </motion.div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 {loading
-                  ? [...Array(6)].map((_, i) => (
+                  ? [...Array(5)].map((_, i) => (
                       <div key={i} className="rounded-2xl bg-white shadow-md border border-gray-100 p-5 flex flex-col items-center animate-pulse">
                         <div className="w-20 h-20 rounded-full bg-gray-200 mb-3" />
                         <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
@@ -464,7 +458,7 @@ export default function Home() {
                       {[
                         { label: 'Founded', value: '2023' },
                         { label: 'Founders', value: '2' },
-                        { label: 'Universities', value: '3' },
+                        { label: 'Universities', value: '1' },
                         { label: 'Rating', value: '4.9 ★' },
                       ].map(item => (
                         <div key={item.label} className="glass rounded-xl p-3 text-center">
@@ -507,7 +501,7 @@ export default function Home() {
                 <motion.ul variants={stagger} className="space-y-3 mb-8">
                   {[
                     'High-intensity, exam-targeted revisions',
-                    'Aligned to UH, BUE, and GUC syllabi',
+                    'Aligned to the UH syllabus — every module, every topic',
                     'WhatsApp tutoring with real instructors',
                     'Lifetime access — pay once, watch forever',
                   ].map(point => (

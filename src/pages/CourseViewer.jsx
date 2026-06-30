@@ -4,13 +4,12 @@ import { motion } from 'framer-motion'
 import {
   Play, Lock, ChevronDown, ChevronRight, Download,
   FileText, MessageCircle, StickyNote, X, Menu,
-  AlertTriangle, Home, Clock, CheckCircle2, ShoppingCart,
+  Home, Clock, CheckCircle2, ShoppingCart,
 } from 'lucide-react'
 import { WHATSAPP_TUTOR_NUMBER } from '../data/constants'
 import { useAuth } from '../contexts/AuthContext'
 import { hasPurchased } from '../lib/auth'
-import BunnyVideoPlayer from '../components/video/BunnyVideoPlayer'
-import { getSegmentsForCourse, DEMO_HLS_URL } from '../data/segments'
+import { getSegmentsForCourse } from '../data/segments'
 import { recordWatch } from '../lib/progress'
 import { supabase } from '../lib/supabase'
 import { useCatalog } from '../hooks/useCatalog'
@@ -21,27 +20,27 @@ const MOCK_MODULES = [
     id: 1,
     title: 'Module 1: Foundations',
     lessons: [
-      { id: 'l1', title: 'Introduction & Overview',          duration: '12:30', free: true,  done: true  },
-      { id: 'l2', title: 'Core Concepts Explained',          duration: '18:45', free: true,  done: true  },
-      { id: 'l3', title: 'Worked Examples — Part 1',         duration: '22:10', free: false, done: false },
+      { id: 'l1', title: 'Introduction & Overview',          duration: '12:30', free: true,  done: true,  youtube_video_id: '48Ck3Fe4Hzk' },
+      { id: 'l2', title: 'Core Concepts Explained',          duration: '18:45', free: true,  done: true,  youtube_video_id: null },
+      { id: 'l3', title: 'Worked Examples — Part 1',         duration: '22:10', free: false, done: false, youtube_video_id: null },
     ],
   },
   {
     id: 2,
     title: 'Module 2: Intermediate',
     lessons: [
-      { id: 'l4', title: 'Deeper Dive into Theory',          duration: '25:00', free: false, done: false },
-      { id: 'l5', title: 'Problem Set Walkthrough',          duration: '30:15', free: false, done: false },
-      { id: 'l6', title: 'Common Mistakes to Avoid',         duration: '14:50', free: false, done: false },
+      { id: 'l4', title: 'Deeper Dive into Theory',          duration: '25:00', free: false, done: false, youtube_video_id: null },
+      { id: 'l5', title: 'Problem Set Walkthrough',          duration: '30:15', free: false, done: false, youtube_video_id: null },
+      { id: 'l6', title: 'Common Mistakes to Avoid',         duration: '14:50', free: false, done: false, youtube_video_id: null },
     ],
   },
   {
     id: 3,
     title: 'Module 3: Advanced',
     lessons: [
-      { id: 'l7', title: 'Advanced Techniques',              duration: '28:30', free: false, done: false },
-      { id: 'l8', title: 'Past Exam Questions',              duration: '35:00', free: false, done: false },
-      { id: 'l9', title: 'Final Review & Summary',           duration: '20:00', free: false, done: false },
+      { id: 'l7', title: 'Advanced Techniques',              duration: '28:30', free: false, done: false, youtube_video_id: null },
+      { id: 'l8', title: 'Past Exam Questions',              duration: '35:00', free: false, done: false, youtube_video_id: null },
+      { id: 'l9', title: 'Final Review & Summary',           duration: '20:00', free: false, done: false, youtube_video_id: null },
     ],
   },
 ]
@@ -272,28 +271,32 @@ export default function CourseViewer() {
             <ChevronRight className="w-4 h-4 text-white/30 flex-shrink-0" />
             <span className="text-white/50 text-sm truncate">{activeLesson.title}</span>
           </div>
-          <div className="hidden sm:flex items-center gap-1.5 text-yellow-500/60 text-xs">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            <span>Recording prohibited</span>
-          </div>
         </div>
 
         {/* Video + content */}
         <div className="flex-1 overflow-y-auto">
-          <BunnyVideoPlayer
-            videoId={resolvedCourse.id}
-            courseId={resolvedCourse.id}
-            fallbackUrl={DEMO_HLS_URL}
-            user={user}
-            chapters={chapters}
-            title={`${resolvedCourse.title} — ${activeLesson.title}`}
-            onWatchedSeconds={(delta) => recordWatch({
-              userEmail: user.email,
-              courseId:  resolvedCourse.id,
-              moduleId:  activeLesson.id,
-              seconds:   delta,
-            })}
-          />
+          {/* YouTube embed or placeholder */}
+          <div className="w-full bg-black">
+            {activeLesson.youtube_video_id ? (
+              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                <iframe
+                  key={activeLesson.youtube_video_id}
+                  src={`https://www.youtube.com/embed/${activeLesson.youtube_video_id}`}
+                  title={activeLesson.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full border-0"
+                />
+              </div>
+            ) : (
+              <div className="relative w-full flex items-center justify-center" style={{ paddingBottom: '56.25%' }}>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                  <Play className="w-12 h-12 text-white/20" />
+                  <p className="text-white/40 text-sm font-medium">Video coming soon</p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Info + tabs */}
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">

@@ -3,10 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Menu, X, ShoppingCart, BookOpen, LogOut, LayoutDashboard, ChevronDown,
-  BarChart3, Coins,
+  BarChart3,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import WalletBalanceBadge from './wallet/WalletBalanceBadge'
 
 const PUBLIC_LINKS = [
   { path: '/',        label: 'Home' },
@@ -154,7 +153,6 @@ export default function Navbar() {
 
             {/* ── Right side ── */}
             <div className="flex items-center gap-2">
-              {isLoggedIn && <WalletBalanceBadge variant={isHome ? 'dark' : 'light'} />}
 
               {!isLoggedIn ? (
                 <>
@@ -213,10 +211,7 @@ export default function Navbar() {
                         <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">
                           <BarChart3 className="w-4 h-4 text-primary" /> My Dashboard
                         </Link>
-                        <Link to="/wallet" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">
-                          <Coins className="w-4 h-4 text-yellow-500" /> Nexus Wallet
-                        </Link>
-                        {isAdmin && (
+{isAdmin && (
                           <Link to="/admin-nexus" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">
                             <LayoutDashboard className="w-4 h-4 text-primary" /> Admin Dashboard
                           </Link>
@@ -282,10 +277,7 @@ export default function Navbar() {
                   <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary/10 hover:text-primary">
                     <BarChart3 className="w-4 h-4" /> Dashboard
                   </Link>
-                  <Link to="/wallet" className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary/10 hover:text-primary">
-                    <Coins className="w-4 h-4 text-yellow-500" /> Wallet
-                  </Link>
-                  {isAdmin && (
+{isAdmin && (
                     <Link to="/admin-nexus" className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary/10 hover:text-primary">
                       <LayoutDashboard className="w-4 h-4" /> Admin
                     </Link>

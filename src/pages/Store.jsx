@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { hasPurchased } from '../lib/auth'
-import { pointsCostFor } from '../lib/pricing'
+import { priceEgpFor } from '../lib/pricing'
 import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
@@ -120,8 +120,8 @@ function ModuleCard({ course, owned, university }) {
             <div>
               <p className="text-xs text-gray-400 mb-0.5">{course.duration}</p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-3xl font-bold text-primary">{pointsCostFor(course).toLocaleString()}</span>
-                <span className="text-gray-400 text-xs uppercase font-semibold tracking-widest">NXP</span>
+                <span className="text-3xl font-bold text-primary">{priceEgpFor(course).toLocaleString()}</span>
+                <span className="text-gray-400 text-xs uppercase font-semibold tracking-widest">EGP</span>
               </div>
             </div>
             <span className="flex items-center gap-1 text-[10px] font-semibold text-yellow-700 bg-yellow-50 px-2 py-1 rounded-full">
@@ -214,7 +214,7 @@ export default function Store() {
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                     className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
-            High-intensity revisions for UH, BUE, GUC, Coventry and Medicine modules.
+            High-intensity revision modules for University of Hertfordshire students.
           </motion.p>
         </div>
         <svg className="absolute bottom-0 left-0 right-0" viewBox="0 0 1440 50" fill="none">
@@ -224,48 +224,50 @@ export default function Store() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* ── University category bar ── */}
-        <div className="mb-6">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-            <GraduationCap className="w-3.5 h-3.5 text-primary" />
-            Choose your university
-          </p>
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-            {loading ? (
-              [...Array(4)].map((_, i) => (
-                <div key={i} className="h-16 w-32 rounded-2xl bg-gray-100 animate-pulse flex-shrink-0" />
-              ))
-            ) : (
-              <>
-                {/* "All" pill */}
-                <button
-                  onClick={() => setActive('all')}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all flex-shrink-0 ${
-                    active === 'all'
-                      ? 'border-primary shadow-lg scale-[1.02] bg-primary text-white'
-                      : 'border-gray-200 hover:border-primary/40 bg-white'
-                  }`}
-                >
-                  <Layers className={`w-5 h-5 ${active === 'all' ? 'text-white' : 'text-primary'}`} />
-                  <div className="text-left">
-                    <p className={`text-xs font-mono uppercase tracking-widest ${active === 'all' ? 'text-white/70' : 'text-gray-400'}`}>All</p>
-                    <p className="text-sm font-semibold">{courses.length} modules</p>
-                  </div>
-                </button>
+        {/* ── University category bar — only shown when multiple universities exist ── */}
+        {(loading || universities.length > 1) && (
+          <div className="mb-6">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <GraduationCap className="w-3.5 h-3.5 text-primary" />
+              Choose your university
+            </p>
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+              {loading ? (
+                [...Array(2)].map((_, i) => (
+                  <div key={i} className="h-16 w-32 rounded-2xl bg-gray-100 animate-pulse flex-shrink-0" />
+                ))
+              ) : (
+                <>
+                  {/* "All" pill */}
+                  <button
+                    onClick={() => setActive('all')}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all flex-shrink-0 ${
+                      active === 'all'
+                        ? 'border-primary shadow-lg scale-[1.02] bg-primary text-white'
+                        : 'border-gray-200 hover:border-primary/40 bg-white'
+                    }`}
+                  >
+                    <Layers className={`w-5 h-5 ${active === 'all' ? 'text-white' : 'text-primary'}`} />
+                    <div className="text-left">
+                      <p className={`text-xs font-mono uppercase tracking-widest ${active === 'all' ? 'text-white/70' : 'text-gray-400'}`}>All</p>
+                      <p className="text-sm font-semibold">{courses.length} modules</p>
+                    </div>
+                  </button>
 
-                {universities.map(uni => (
-                  <UniversityChip
-                    key={uni.id}
-                    uni={uni}
-                    isActive={active === uni.id}
-                    onClick={() => setActive(uni.id)}
-                    count={courses.filter(c => c.universityId === uni.id).length}
-                  />
-                ))}
-              </>
-            )}
+                  {universities.map(uni => (
+                    <UniversityChip
+                      key={uni.id}
+                      uni={uni}
+                      isActive={active === uni.id}
+                      onClick={() => setActive(uni.id)}
+                      count={courses.filter(c => c.universityId === uni.id).length}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ── Search + count ── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">

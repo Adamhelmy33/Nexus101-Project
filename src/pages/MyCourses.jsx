@@ -5,7 +5,7 @@ import {
   CheckCircle2, Calendar, Sparkles,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { pointsCostFor } from '../lib/pricing'
+import { priceEgpFor } from '../lib/pricing'
 import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
@@ -187,7 +187,7 @@ export default function MyCourses() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-gray-900 truncate">{course.title}</p>
-                    <p className="text-xs text-gray-400">{pointsCostFor(course).toLocaleString()} NXP · {course.duration}</p>
+                    <p className="text-xs text-gray-400">{priceEgpFor(course).toLocaleString()} EGP · {course.duration}</p>
                   </div>
                   <ShoppingCart className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors flex-shrink-0" />
                 </Link>

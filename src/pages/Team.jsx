@@ -237,7 +237,7 @@ export default function Team() {
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                     className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
-            Two founders, six instructors, one mission — your university success.
+            Two founders, five instructors, one mission — your university success.
           </motion.p>
         </div>
         <svg className="absolute bottom-0 left-0 right-0" viewBox="0 0 1440 50" fill="none">
@@ -271,7 +271,7 @@ export default function Team() {
               <Users className="w-4 h-4" /> Instructors
             </p>
             <h2 className="text-3xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Six experts. One goal.
+              Five experts. One goal.
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               Each instructor specialises in a slice of the curriculum — and they all want one thing: high marks for you.
@@ -280,7 +280,7 @@ export default function Team() {
 
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
+              {[...Array(5)].map((_, i) => (
                 <div key={i} className="rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden animate-pulse">
                   <div className="h-36 bg-gray-200" />
                   <div className="p-5 flex flex-col items-center gap-3">

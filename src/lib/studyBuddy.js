@@ -119,9 +119,9 @@ function smartMockAnswer(question, courseId) {
     return `It's totally normal to get stuck — here's what works for most students:\n\n1. Pause the video and re-watch the last 60 seconds at 0.75× speed.\n2. Try one worked example from the PDF revision sheet.\n3. If still unclear, message a tutor on WhatsApp — they're usually live.\n\nIn this module, the topic students get stuck on the most is **${t.title}** — start there.`
   }
 
-  /* Pricing / wallet */
-  if (/price|cost|points|wallet|nxp|bundle|free course/i.test(q)) {
-    return `Each revision module costs **1000 NXP**. The smallest bundle is **1200 NXP for 1200 EGP**, leaving you 200 residual every time. Stack 5 bundles → 1000 residual → unlock a **free 6th module**. Check your wallet for a live progress bar.`
+  /* Pricing */
+  if (/price|cost|how much|payment/i.test(q)) {
+    return `Module prices range from 850–1100 EGP depending on your university, paid directly via card, mobile wallet, or Fawry kiosk. Visit the store to see the exact price for each module.`
   }
 
   /* Founders / who */

@@ -273,9 +273,8 @@ export async function getAdminMetrics(courses) {
     (u.purchases || []).map(p => ({ ...p, email: u.email, name: u.name }))
   )
 
-  // Revenue = points_spent (wallet token purchases, 1 NXP = 1 EGP) || amount (direct card/cash)
-  // Wallet purchases always record amount=0 and points_spent=coursePrice, so we must use points_spent.
-  const revenueOf = p => (p.pointsSpent || 0) + (p.amount || 0)
+  // Revenue = amount (EGP paid directly via Paymob or demo flow)
+  const revenueOf = p => (p.amount || 0)
   const totalRevenue   = allPurchases.reduce((sum, p) => sum + revenueOf(p), 0)
   const subscriberCount = users.filter(u => !u.isAdmin && u.purchases.length > 0).length
   const activeViewers   = getActiveViewers().length

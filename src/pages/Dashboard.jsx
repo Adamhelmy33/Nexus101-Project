@@ -2,28 +2,21 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  BarChart3, Coins, Sparkles, Trophy, BookOpen, ArrowRight,
-  Play, Plus, Target, Activity, MessageCircle, Award, Database, Wand2,
+  BarChart3, Sparkles, Trophy, BookOpen, ArrowRight,
+  Plus, Target, Activity, MessageCircle, Database, Wand2,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { useWallet } from '../contexts/WalletContext'
 import { getProgressSummary, seedDemoProgress } from '../lib/progress'
 import { WHATSAPP_TUTOR_NUMBER } from '../data/constants'
-import { useCatalog } from '../hooks/useCatalog'
 import SkillHeatmap from '../components/dashboard/SkillHeatmap'
 import HoursChart   from '../components/dashboard/HoursChart'
-import LoyaltyTierCard from '../components/wallet/LoyaltyTierCard'
-import FreeCourseProgress from '../components/wallet/FreeCourseProgress'
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const wallet = useWallet()
 
   const purchases = user?.purchases || []
   const [tick, setTick] = useState(0)
 
-  /* If they own modules but have zero progress, seed plausible demo data so
-     the heatmap isn't empty on first visit (only fires once per browser). */
   useEffect(() => {
     if (!user || !purchases.length) return
     seedDemoProgress(user.email, purchases)
@@ -37,14 +30,9 @@ export default function Dashboard() {
     // eslint-disable-next-line
   }, [user?.email, purchases.length, tick])
 
-  /* `wallet.ready` now strictly implies `wallet.balance` etc. exist
-     (see WalletContext fix), but we also bail on missing user so the
-     post-logout render window before ProtectedRoute redirects can't
-     crash on `user.name.split(...)`. */
-  if (!user || !wallet?.ready || wallet.balance === undefined || !summary) return null
+  if (!user || !summary) return null
 
   const masteredTopics = summary.topicMastery.filter(t => t.mastery >= 0.8).length
-  const startedTopics  = summary.topicMastery.filter(t => t.mastery > 0 && t.mastery < 0.8).length
   const totalTopics    = summary.topicMastery.length
 
   return (
@@ -72,38 +60,33 @@ export default function Dashboard() {
         </motion.div>
 
         {/* KPI strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <Kpi icon={Coins}    label="Wallet"            value={`${wallet.balance.toLocaleString()} NXP`} accent="#f0a500" />
-          <Kpi icon={BookOpen} label="Modules"           value={purchases.length}                          accent="#0047AB" />
-          <Kpi icon={Activity} label="Hours studied"     value={summary.totalHours.toFixed(1)}              accent="#0891b2" />
-          <Kpi icon={Trophy}   label="Topics mastered"   value={`${masteredTopics}/${totalTopics || '–'}`}  accent="#16a34a" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+          <Kpi icon={BookOpen} label="Modules"         value={purchases.length}                          accent="#0047AB" />
+          <Kpi icon={Activity} label="Hours studied"   value={summary.totalHours.toFixed(1)}              accent="#0891b2" />
+          <Kpi icon={Trophy}   label="Topics mastered" value={`${masteredTopics}/${totalTopics || '–'}`}  accent="#16a34a" />
         </div>
 
-        {/* Top: free-course + tier (always visible) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <FreeCourseProgress />
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <LoyaltyTierCard />
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+        {/* Top row: WhatsApp tutoring */}
+        <div className="mb-6">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
                       className="rounded-2xl p-5 relative overflow-hidden text-white"
                       style={{ background: 'linear-gradient(135deg, #25d366, #128c7e)' }}>
             <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/10" />
-            <div className="relative">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
-                <MessageCircle className="w-3.5 h-3.5" /> 24/7 Tutoring
-              </p>
-              <h3 className="text-xl font-bold mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Stuck on something?
-              </h3>
-              <p className="text-xs text-white/80 mb-4 leading-relaxed">
-                Ask a real tutor on WhatsApp — usually replies within an hour.
-              </p>
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5" /> 24/7 Tutoring
+                </p>
+                <h3 className="text-xl font-bold mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Stuck on something?
+                </h3>
+                <p className="text-xs text-white/80 leading-relaxed">
+                  Ask a real tutor on WhatsApp — usually replies within an hour.
+                </p>
+              </div>
               <a href={`https://wa.me/${WHATSAPP_TUTOR_NUMBER}?text=${encodeURIComponent('Hi! I need help with…')}`}
                  target="_blank" rel="noopener noreferrer"
-                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white text-green-700 hover:scale-105 transition-transform">
+                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white text-green-700 hover:scale-105 transition-transform flex-shrink-0">
                 Open chat <ArrowRight className="w-3 h-3" />
               </a>
             </div>

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { CheckCircle2, ArrowRight, Play, Coins, Sparkles, BarChart3 } from 'lucide-react'
+import { CheckCircle2, ArrowRight, Play, Sparkles, BarChart3 } from 'lucide-react'
 import { COURSES } from '../data/constants'
 
 export default function CheckoutSuccess() {
@@ -9,10 +9,9 @@ export default function CheckoutSuccess() {
   const { state }    = useLocation()
   const navigate     = useNavigate()
 
-  const course = state?.course || COURSES.find(c => c.id === courseId)
-  const txnId         = state?.txnId         || `NEX-${Date.now()}`
-  const pricePoints   = state?.pricePoints   || 1000
-  const balanceAfter  = state?.balanceAfter
+  const course  = state?.course || COURSES.find(c => c.id === courseId)
+  const txnId   = state?.txnId  || `NEX-${Date.now()}`
+  const priceEgp = state?.priceEgp
 
   useEffect(() => {
     const t = setTimeout(() => navigate('/my-courses'), 9000)
@@ -45,19 +44,18 @@ export default function CheckoutSuccess() {
         </div>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-          Redeem successful!
+          Payment successful!
         </h1>
         <p className="text-gray-500 text-sm mb-6 leading-relaxed">
           You now have lifetime access to <strong>{course.title}</strong>.
         </p>
 
         <div className="rounded-2xl p-4 mb-6 text-left text-sm" style={{ background: '#f8faff', border: '1px solid #e2ecf9' }}>
-          <Row label="Module"        value={course.title} />
-          <Row label="Points spent"  value={`${pricePoints.toLocaleString()} NXP`} mono />
-          {balanceAfter !== undefined && (
-            <Row label="Wallet now"    value={`${balanceAfter.toLocaleString()} NXP`} mono accent />
+          <Row label="Module"      value={course.title} />
+          {priceEgp != null && (
+            <Row label="Amount paid" value={`${priceEgp.toLocaleString()} EGP`} mono />
           )}
-          <Row label="Transaction"   value={txnId} mono />
+          <Row label="Transaction" value={txnId} mono />
         </div>
 
         <div className="flex flex-col gap-3">
@@ -73,20 +71,16 @@ export default function CheckoutSuccess() {
             </Link>
           </div>
         </div>
-
-        <p className="text-xs text-gray-400 mt-6 flex items-center justify-center gap-1.5">
-          <Coins className="w-3 h-3 text-yellow-500" /> Receipt in your transaction history
-        </p>
       </motion.div>
     </div>
   )
 }
 
-function Row({ label, value, mono = false, accent = false }) {
+function Row({ label, value, mono = false }) {
   return (
     <div className="flex items-center justify-between py-1.5">
       <span className="text-gray-500 text-xs">{label}</span>
-      <span className={`font-semibold text-xs ${mono ? 'font-mono' : ''} ${accent ? 'text-primary' : 'text-gray-900'}`}>{value}</span>
+      <span className={`font-semibold text-xs text-gray-900 ${mono ? 'font-mono' : ''}`}>{value}</span>
     </div>
   )
 }

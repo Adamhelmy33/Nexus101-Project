@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: 'Which universities do you cover?',
-    a: 'Currently University of Hertfordshire, British University in Egypt, and German University in Cairo — with more on the way. Drop us a message if your university isn\'t listed yet.',
+    a: 'Currently University of Hertfordshire — with more universities on the way. Drop us a message if your university isn\'t listed yet.',
   },
 ]
 
