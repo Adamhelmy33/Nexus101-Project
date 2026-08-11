@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import {
-  COURSES      as STATIC_COURSES,
+  COURSES as STATIC_COURSES,
   UNIVERSITIES as STATIC_UNIVERSITIES,
-  INSTRUCTORS  as STATIC_INSTRUCTORS,
+  INSTRUCTORS as STATIC_INSTRUCTORS,
 } from '../data/constants'
 import { hydrateCourseCache } from '../lib/courseCache'
 
@@ -23,67 +23,79 @@ function gradientFor(idx) {
 function normalizeDbCourse(row, idx) {
   const staticMatch = STATIC_COURSES.find(c => c.id === row.slug)
   const from = row.gradient_from ?? staticMatch?.gradientFrom ?? gradientFor(idx).gradientFrom
-  const to   = row.gradient_to   ?? staticMatch?.gradientTo   ?? gradientFor(idx).gradientTo
+  const to = row.gradient_to ?? staticMatch?.gradientTo ?? gradientFor(idx).gradientTo
   return {
-    id:           row.slug,
+    id: row.slug,
     universityId: row.university?.slug ?? '',
-    title:        row.title,
-    subtitle:     row.subtitle     ?? '',
-    description:  row.description  ?? '',
-    icon:         row.icon         ?? staticMatch?.icon ?? '📚',
+    title: row.title,
+    subtitle: row.subtitle ?? '',
+    description: row.description ?? '',
+    icon: row.icon ?? staticMatch?.icon ?? '📚',
     gradientFrom: from,
-    gradientTo:   to,
-    price:        row.price_egp    ?? row.price_points ?? staticMatch?.price ?? 0,
-    oldPrice:     row.old_price_egp ?? staticMatch?.oldPrice ?? null,
-    currency:     row.currency     ?? 'EGP',
-    duration:     'Lifetime access',
-    modules:      row.module_count ?? staticMatch?.modules ?? 0,
-    hours:        row.hours        ?? staticMatch?.hours ?? 0,
-    students:     row.student_count ?? staticMatch?.students ?? 0,
-    level:        row.level        ?? staticMatch?.level ?? '',
-    features:     Array.isArray(row.features)    && row.features.length    ? row.features    : (staticMatch?.features ?? []),
-    topics:       Array.isArray(row.topics_list) && row.topics_list.length ? row.topics_list : (staticMatch?.topics   ?? []),
-    badge:        row.badge ?? staticMatch?.badge ?? null,
-    _fromDb:      true,
+    gradientTo: to,
+    price: row.price_egp ?? row.price_points ?? staticMatch?.price ?? 0,
+    oldPrice: row.old_price_egp ?? staticMatch?.oldPrice ?? null,
+    currency: row.currency ?? 'EGP',
+    duration: 'Lifetime access',
+    modules: row.module_count ?? staticMatch?.modules ?? 0,
+    hours: row.hours ?? staticMatch?.hours ?? 0,
+    students: row.student_count ?? staticMatch?.students ?? 0,
+    subject: row.subject ?? staticMatch?.subject ?? '',
+    studyLevel: row.study_level ?? staticMatch?.studyLevel ?? '',
+    level: row.level ?? staticMatch?.level ?? '',
+    features: Array.isArray(row.features) && row.features.length ? row.features : (staticMatch?.features ?? []),
+    topics: Array.isArray(row.topics_list) && row.topics_list.length ? row.topics_list : (staticMatch?.topics ?? []),
+    badge: row.badge ?? staticMatch?.badge ?? null,
+    bundlePrice: row.bundle_price_egp ?? null,
+    buy_form_url: row.buy_form_url ?? staticMatch?.buy_form_url ?? null,
+    free_revision_youtube_url: row.free_revision_youtube_url ?? null,
+    instructors: (row.course_instructors && row.course_instructors.length > 0)
+      ? row.course_instructors.map(ci => ci.instructor).filter(Boolean).map(ins => ({
+          id: ins.slug,
+          name: ins.name,
+          initials: ins.initials,
+        }))
+      : (staticMatch?.instructors ?? []),
+    _fromDb: true,
   }
 }
 
 function normalizeDbUniversity(row) {
   const s = STATIC_UNIVERSITIES.find(u => u.id === row.slug)
   return {
-    id:          row.slug,
-    name:        row.name,
-    shortName:   row.short_name  ?? s?.shortName  ?? '',
-    tagline:     row.tagline     ?? s?.tagline     ?? '',
+    id: row.slug,
+    name: row.name,
+    shortName: row.short_name ?? s?.shortName ?? '',
+    tagline: row.tagline ?? s?.tagline ?? '',
     description: row.description ?? s?.description ?? '',
-    color:       row.color       ?? s?.color       ?? '#0047AB',
+    color: row.color ?? s?.color ?? '#0047AB',
     accentColor: row.accent_color ?? s?.accentColor ?? '#f0a500',
-    location:    row.location    ?? s?.location    ?? '',
-    icon:        row.icon        ?? s?.icon        ?? '🎓',
-    _fromDb:     true,
+    location: row.location ?? s?.location ?? '',
+    icon: row.icon ?? s?.icon ?? '🎓',
+    _fromDb: true,
   }
 }
 
 function normalizeDbInstructor(row, idx) {
   const s = STATIC_INSTRUCTORS.find(i => i.id === row.slug)
   const from = row.gradient_from ?? s?.gradientFrom ?? gradientFor(idx).gradientFrom
-  const to   = row.gradient_to   ?? s?.gradientTo   ?? gradientFor(idx).gradientTo
+  const to = row.gradient_to ?? s?.gradientTo ?? gradientFor(idx).gradientTo
   return {
-    id:           row.slug,
-    name:         row.name,
-    role:         row.role     ?? s?.role     ?? '',
-    subject:      row.subject  ?? s?.subject  ?? '',
-    photo:        row.photo_url ?? row.photo  ?? s?.photo ?? '',
-    initials:     row.initials ?? row.name.split(' ').map(w => w[0]).join('').slice(0, 2),
+    id: row.slug,
+    name: row.name,
+    role: row.role ?? s?.role ?? '',
+    subject: row.subject ?? s?.subject ?? '',
+    photo: row.photo_url ?? row.photo ?? s?.photo ?? '',
+    initials: row.initials ?? row.name.split(' ').map(w => w[0]).join('').slice(0, 2),
     gradientFrom: from,
-    gradientTo:   to,
+    gradientTo: to,
     universities: (row.instructor_universities ?? [])
       .map(iu => iu.university?.short_name)
       .filter(Boolean),
-    rating:       Number(row.rating)    || s?.rating   || 4.8,
-    students:     Number(row.students)  || s?.students || 0,
-    bio:          row.bio ?? s?.bio ?? '',
-    _fromDb:      true,
+    rating: Number(row.rating) || s?.rating || 4.8,
+    students: Number(row.students) || s?.students || 0,
+    bio: row.bio ?? s?.bio ?? '',
+    _fromDb: true,
   }
 }
 
@@ -111,13 +123,13 @@ async function fetchOne(promise, fallback, label) {
 }
 
 function fetchDbCatalog() {
-  if (_cache)   return Promise.resolve(_cache)
+  if (_cache) return Promise.resolve(_cache)
   if (_promise) return _promise
 
   _promise = Promise.all([
     fetchOne(
       supabase.from('courses')
-        .select('*, university:universities(slug, short_name)')
+        .select('*, university:universities(slug, short_name), course_instructors(instructor:instructors(*))')
         .eq('published', true)
         .order('created_at'),
       null, 'courses',
@@ -135,9 +147,9 @@ function fetchDbCatalog() {
       null, 'instructors',
     ),
   ]).then(([dbC, dbU, dbI]) => {
-    const courses      = dbC ? dbC.map(normalizeDbCourse)     : STATIC_COURSES
+    const courses = dbC ? dbC.map(normalizeDbCourse) : STATIC_COURSES
     const universities = dbU ? dbU.map(normalizeDbUniversity) : STATIC_UNIVERSITIES
-    const instructors  = dbI ? dbI.map(normalizeDbInstructor) : STATIC_INSTRUCTORS
+    const instructors = dbI ? dbI.map(normalizeDbInstructor) : STATIC_INSTRUCTORS
 
     _cache = { courses, universities, instructors }
     hydrateCourseCache(courses)
@@ -145,9 +157,9 @@ function fetchDbCatalog() {
   }).catch((err) => {
     console.warn('[useCatalog] catastrophic failure, using static fallback:', err)
     const fallback = {
-      courses:      STATIC_COURSES,
+      courses: STATIC_COURSES,
       universities: STATIC_UNIVERSITIES,
-      instructors:  STATIC_INSTRUCTORS,
+      instructors: STATIC_INSTRUCTORS,
     }
     _cache = fallback
     hydrateCourseCache(STATIC_COURSES)
@@ -170,10 +182,10 @@ export function useCatalog() {
     // so there's zero loading flash on subsequent page visits.
     if (_cache) return { ..._cache, loading: false }
     return {
-      courses:      [],
+      courses: [],
       universities: [],
-      instructors:  [],
-      loading:      true,
+      instructors: [],
+      loading: true,
     }
   })
 
@@ -184,7 +196,7 @@ export function useCatalog() {
     fetchDbCatalog().then(({ courses, universities, instructors }) => {
       setState({ courses, universities, instructors, loading: false })
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return state

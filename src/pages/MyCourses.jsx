@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  Play, Clock, BookOpen, Lock, ShoppingCart, ArrowRight,
+  Clock, BookOpen, Lock, ShoppingCart, ArrowRight,
   CheckCircle2, Calendar, Sparkles,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
@@ -27,10 +27,21 @@ export default function MyCourses() {
   }
 
   const purchases = user?.purchases || []
-  const ownedIds  = purchases.map(p => p.courseId)
-  const ownedSet  = new Set(ownedIds)
-  const owned     = courses.filter(c => ownedSet.has(c.id))
-  const notOwned  = courses.filter(c => !ownedSet.has(c.id))
+
+  // A course is "owned" if the user has ANY purchase row for it
+  // (could be a bundle row or one or more individual item rows)
+  const courseIdsWithPurchase = new Set(purchases.map(p => p.courseId))
+  const owned    = courses.filter(c => courseIdsWithPurchase.has(c.id))
+  const notOwned = courses.filter(c => !courseIdsWithPurchase.has(c.id))
+
+  // Helper: given a course, return the earliest purchase date for any row
+  function earliestPurchaseDate(courseId) {
+    const rows = purchases.filter(p => p.courseId === courseId)
+    if (!rows.length) return null
+    return rows.reduce((min, p) => (
+      !min || new Date(p.purchasedAt) < new Date(min) ? p.purchasedAt : min
+    ), null)
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-16" style={{ background: '#f8faff' }}>
@@ -85,33 +96,26 @@ export default function MyCourses() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-14"
           >
             {owned.map(course => {
-              const purchase = purchases.find(p => p.courseId === course.id)
               return (
                 <motion.div
                   key={course.id}
                   variants={fadeUp}
                   className="card-hover bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 flex flex-col"
                 >
-                  {/* Thumbnail */}
-                  <Link to={`/learn/${course.id}`} className="block relative h-44 overflow-hidden group">
+                  {/* Thumbnail — static, no /learn/ link */}
+                  <div className="block relative h-44 overflow-hidden">
                     <div
                       className="absolute inset-0 flex items-center justify-center"
                       style={{ background: `linear-gradient(135deg, ${course.gradientFrom}, ${course.gradientTo})` }}
                     >
                       <span className="text-7xl select-none opacity-90">{course.icon}</span>
                     </div>
-                    {/* Play overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                      <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center scale-0 group-hover:scale-100 transition-transform shadow-2xl">
-                        <Play className="w-7 h-7 text-primary ml-1" fill="currentColor" />
-                      </div>
-                    </div>
                     {/* Owned badge */}
                     <span className="absolute top-3 right-3 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"
                           style={{ background: '#22c55e', color: 'white' }}>
                       <CheckCircle2 className="w-3 h-3" /> Unlocked
                     </span>
-                  </Link>
+                  </div>
 
                   {/* Body */}
                   <div className="p-5 flex-1 flex flex-col">
@@ -120,33 +124,44 @@ export default function MyCourses() {
                     </h3>
                     <p className="text-xs text-gray-500 mb-3">{course.subtitle}</p>
 
-                    <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                    <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
                       <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" /> {course.modules} modules</span>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {course.hours}h</span>
                     </div>
 
-                    {/* Progress placeholder — replace when real progress tracked */}
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                        <span>Progress</span>
-                        <span className="font-semibold text-primary">0%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: '0%', background: 'linear-gradient(90deg, #0047AB, #1a6fd4)' }} />
-                      </div>
-                    </div>
+                    {/* Item-level ownership summary */}
+                    {(() => {
+                      const myRows  = purchases.filter(p => p.courseId === course.id)
+                      const bundle  = myRows.some(p => p.itemId === null)
+                      const itemIds = myRows.filter(p => p.itemId !== null).map(p => p.itemId)
+                      return (
+                        <div className="mb-3 p-2.5 rounded-xl" style={{ background: '#f0f9ff', border: '1px solid #bae6fd' }}>
+                          {bundle ? (
+                            <p className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> All items unlocked (bundle)
+                            </p>
+                          ) : itemIds.length > 0 ? (
+                            <p className="text-xs font-semibold text-blue-700">
+                              {itemIds.length} item{itemIds.length !== 1 ? 's' : ''} owned individually
+                            </p>
+                          ) : (
+                            <p className="text-xs text-gray-500">Course-level access</p>
+                          )}
+                        </div>
+                      )
+                    })()}
 
                     <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5 mt-auto">
                       <Calendar className="w-3 h-3" />
-                      Purchased {purchase?.purchasedAt ? new Date(purchase.purchasedAt).toLocaleDateString() : '—'}
+                      Purchased {earliestPurchaseDate(course.id) ? new Date(earliestPurchaseDate(course.id)).toLocaleDateString() : '—'}
                     </p>
 
                     <Link
-                      to={`/learn/${course.id}`}
+                      to={`/module/${course.id}`}
                       className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.02] shadow-md"
                       style={{ background: `linear-gradient(135deg, ${course.gradientFrom}, ${course.gradientTo})` }}
                     >
-                      <Play className="w-4 h-4" /> Continue Watching
+                      <BookOpen className="w-4 h-4" /> View Module Details
                     </Link>
                   </div>
                 </motion.div>
@@ -176,7 +191,7 @@ export default function MyCourses() {
               {notOwned.map(course => (
                 <Link
                   key={course.id}
-                  to={`/checkout/${course.id}`}
+                  to={`/module/${course.id}`}
                   className="card-hover bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 flex items-center gap-4 p-4 group"
                 >
                   <div

@@ -158,7 +158,7 @@ export default function Dashboard() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {summary.perCourse.map(c => (
-                <Link key={c.id} to={`/learn/${c.id}`} className="group rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow">
+                <Link key={c.id} to={`/module/${c.id}`} className="group rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow">
                   <div className="h-20 flex items-end p-3 relative" style={{ background: `linear-gradient(135deg, ${c.gradientFrom}, ${c.gradientTo})` }}>
                     <span className="text-2xl">{c.icon}</span>
                   </div>

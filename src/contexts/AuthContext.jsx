@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import {
   login as doLogin, logout as doLogout, register as doRegister,
-  recordPurchase, pingActiveViewer,
+  pingActiveViewer,
 } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 
@@ -29,7 +29,7 @@ async function buildUserFromAuth(authUser) {
   try {
     const { data } = await supabase
       .from('purchases')
-      .select('course_id, purchased_at, amount, points_spent, method, txn_id')
+      .select('course_id, item_id, purchased_at, amount, method, txn_id')
       .eq('user_id', authUser.id)
       .order('purchased_at', { ascending: false })
     purchases = data || []
@@ -44,9 +44,9 @@ async function buildUserFromAuth(authUser) {
     isAdmin:      profile?.role === 'admin',
     purchases:    purchases.map(p => ({
       courseId:    p.course_id,
+      itemId:      p.item_id ?? null,
       purchasedAt: p.purchased_at,
       amount:      p.amount,
-      pointsSpent: p.points_spent,
       method:      p.method,
       txnId:       p.txn_id,
     })),
@@ -152,11 +152,6 @@ export function AuthProvider({ children }) {
     hydratedIdRef.current = null
   }, [])
 
-  const purchase = useCallback(async (courseId, paymentMeta) => {
-    const res = await recordPurchase(courseId, paymentMeta)
-    if (res.ok) setUser(res.user)
-    return res
-  }, [])
 
   const refreshUser = useCallback(async () => {
     try {
@@ -173,7 +168,7 @@ export function AuthProvider({ children }) {
     user, ready,
     isLoggedIn: !!user,
     isAdmin:    !!user?.isAdmin,
-    login, register, logout, purchase, refreshUser,
+    login, register, logout, refreshUser,
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

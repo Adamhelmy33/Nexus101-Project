@@ -10,7 +10,7 @@ import AnimatedCounter from '../components/AnimatedCounter'
 import Avatar from '../components/Avatar'
 import ParallaxBackground from '../components/ParallaxBackground'
 import WhatsAppTutorButton from '../components/WhatsAppTutorButton'
-import { FOUNDERS, STATS } from '../data/constants'
+import { FOUNDERS, STATS, UH_SUBJECTS } from '../data/constants'
 import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
@@ -37,8 +37,8 @@ const STAT_ICONS = {
 }
 
 /* ─── University card ─────────────────────────── */
-function UniversityCard({ uni, idx, courses }) {
-  const moduleCount = courses.filter(c => c.universityId === uni.id).length
+function UniversityCard({ uni }) {
+  const subjectCount = UH_SUBJECTS.length
   return (
     <motion.div
       variants={fadeUp}
@@ -69,10 +69,10 @@ function UniversityCard({ uni, idx, courses }) {
 
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <span className="flex items-center gap-1.5 text-xs text-gray-500">
-            <Layers className="w-3.5 h-3.5 text-primary" /> {moduleCount} modules
+            <Layers className="w-3.5 h-3.5 text-primary" /> {subjectCount} subjects
           </span>
-          <Link to={`/store?uni=${uni.id}`} className="text-sm font-semibold text-primary group-hover:gap-2 flex items-center gap-1 transition-all">
-            View modules <ArrowRight className="w-3.5 h-3.5" />
+          <Link to="/store" className="text-sm font-semibold text-primary group-hover:gap-2 flex items-center gap-1 transition-all">
+            Browse subjects <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>
@@ -362,21 +362,23 @@ export default function Home() {
                 </p>
               </motion.div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {loading
-                  ? [...Array(1)].map((_, i) => (
-                      <div key={i} className="rounded-3xl overflow-hidden bg-white shadow-md border border-gray-100 animate-pulse">
-                        <div className="h-48 bg-gray-200" />
-                        <div className="p-6 space-y-3">
-                          <div className="h-5 bg-gray-200 rounded w-3/4" />
-                          <div className="h-3 bg-gray-100 rounded w-1/2" />
-                          <div className="h-3 bg-gray-100 rounded w-full" />
-                          <div className="h-3 bg-gray-100 rounded w-5/6" />
+              <div className="flex justify-center">
+                <div className="w-full max-w-sm">
+                  {loading
+                    ? (
+                        <div className="rounded-3xl overflow-hidden bg-white shadow-md border border-gray-100 animate-pulse">
+                          <div className="h-48 bg-gray-200" />
+                          <div className="p-6 space-y-3">
+                            <div className="h-5 bg-gray-200 rounded w-3/4" />
+                            <div className="h-3 bg-gray-100 rounded w-1/2" />
+                            <div className="h-3 bg-gray-100 rounded w-full" />
+                            <div className="h-3 bg-gray-100 rounded w-5/6" />
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  : universities.map((uni, idx) => <UniversityCard key={uni.id} uni={uni} idx={idx} courses={courses} />)
-                }
+                      )
+                    : universities.map((uni) => <UniversityCard key={uni.id} uni={uni} />)
+                  }
+                </div>
               </div>
             </Section>
           </div>
@@ -432,12 +434,14 @@ export default function Home() {
                   <span className="gradient-text">for university students.</span>
                 </h2>
                 <p className="text-gray-500 text-lg max-w-xl mx-auto">
-                  Two passionate founders behind every video and revision sheet.
+                  The passionate founder behind every video and revision sheet.
                 </p>
               </motion.div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-                {FOUNDERS.map((f) => <FounderHero key={f.id} founder={f} />)}
+              <div className="flex justify-center">
+                <div className="w-full max-w-sm">
+                  {FOUNDERS.map((f) => <FounderHero key={f.id} founder={f} />)}
+                </div>
               </div>
             </Section>
           </div>

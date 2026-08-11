@@ -48,7 +48,7 @@ async function loadUserWithProfile(authUser) {
   try {
     const { data, error } = await supabase
       .from('purchases')
-      .select('course_id, purchased_at, amount, points_spent, method, txn_id')
+      .select('course_id, item_id, purchased_at, amount, method, txn_id')
       .eq('user_id', authUser.id)
       .order('purchased_at', { ascending: false })
     if (error) console.warn('[auth] purchases fetch failed:', error.message)
@@ -64,9 +64,9 @@ async function loadUserWithProfile(authUser) {
     isAdmin:      profile?.role === 'admin',
     purchases:    purchases.map(p => ({
       courseId:    p.course_id,
+      itemId:      p.item_id ?? null,
       purchasedAt: p.purchased_at,
       amount:      p.amount,
-      pointsSpent: p.points_spent,
       method:      p.method,
       txnId:       p.txn_id,
     })),
@@ -143,54 +143,7 @@ export async function register({ email, password, name }) {
   return { ok: true, user, needsConfirmation: !data.session }
 }
 
-/* ── Purchase a course (writes into purchases table) ──
-   Called by the wallet redeem flow. */
-export async function recordPurchase(courseId, paymentMeta = {}) {
-  try {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) return { ok: false, error: 'Not logged in.' }
-    const authUser = session.user
 
-    let profile = null
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('name, email')
-        .eq('id', authUser.id)
-        .maybeSingle()
-      profile = data
-    } catch (err) { console.warn('[auth] purchase profile lookup failed:', err) }
-
-    const row = {
-      user_id:      authUser.id,
-      user_email:   profile?.email || authUser.email,
-      user_name:    profile?.name || null,
-      course_id:    courseId,
-      amount:       paymentMeta.amount || 0,
-      points_spent: paymentMeta.pointsSpent || 0,
-      method:       paymentMeta.method || 'wallet',
-      txn_id:       paymentMeta.txnId || `NEX-${Date.now()}`,
-      meta:         paymentMeta.meta || {},
-    }
-
-    const { error } = await supabase.from('purchases').insert(row)
-    if (error) {
-      if (error.code === '23505') return { ok: false, error: 'You already own this course.' }
-      return { ok: false, error: error.message }
-    }
-    const user = await loadUserWithProfile(authUser)
-    return { ok: true, user }
-  } catch (err) {
-    console.warn('[auth] recordPurchase threw:', err)
-    return { ok: false, error: 'Network error. Please try again.' }
-  }
-}
-
-export function hasPurchased(user, courseId) {
-  if (!user) return false
-  if (user.isAdmin) return true
-  return (user.purchases || []).some(p => p.courseId === courseId)
-}
 
 /* ── Active viewers tracking (local-only presence) ──
    Presence is per-tab and ephemeral; storing it server-side would
@@ -236,7 +189,7 @@ export async function getAllUsers() {
   try {
     const { data, error } = await supabase
       .from('purchases')
-      .select('user_id, course_id, purchased_at, amount, points_spent, method, txn_id')
+      .select('user_id, course_id, item_id, purchased_at, amount, method, txn_id')
     if (error) console.warn('[auth] getAllUsers purchases failed:', error.message)
     else allPurchases = data || []
   } catch (err) {
@@ -248,9 +201,9 @@ export async function getAllUsers() {
     if (!byUser.has(p.user_id)) byUser.set(p.user_id, [])
     byUser.get(p.user_id).push({
       courseId:    p.course_id,
+      itemId:      p.item_id ?? null,
       purchasedAt: p.purchased_at,
       amount:      p.amount,
-      pointsSpent: p.points_spent,
       method:      p.method,
       txnId:       p.txn_id,
     })

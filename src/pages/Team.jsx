@@ -237,7 +237,7 @@ export default function Team() {
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                     className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
-            Two founders, five instructors, one mission — your university success.
+            One founder, five instructors, one mission — your university success.
           </motion.p>
         </div>
         <svg className="absolute bottom-0 left-0 right-0" viewBox="0 0 1440 50" fill="none">
@@ -253,13 +253,15 @@ export default function Team() {
                       className="text-center mb-12">
             <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Founders</p>
             <h2 className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-              The two who started Nexus 101
+              The one who started Nexus 101
             </h2>
           </motion.div>
 
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {FOUNDERS.map(f => <FounderCard key={f.id} founder={f} />)}
+                      className="flex justify-center">
+            <div className="w-full max-w-sm">
+              {FOUNDERS.map(f => <FounderCard key={f.id} founder={f} />)}
+            </div>
           </motion.div>
         </section>
 

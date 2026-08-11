@@ -27,7 +27,7 @@ export default function StudyBuddyWidget() {
   const scrollRef = useRef(null)
 
   /* Detect what course we're in (drives the AI context) */
-  const courseId = location.pathname.match(/^\/learn\/([^\/]+)/)?.[1] || null
+  const courseId = location.pathname.match(/^\/module\/([^\/]+)/)?.[1] || null
   const course   = courseId && COURSES.find(c => c.id === courseId)
 
   /* Load history when user changes */
@@ -250,7 +250,7 @@ function ChatBubble({ m }) {
         {m.citations?.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
             {m.citations.map((c, i) => (
-              <Link key={i} to={`/learn/${c.courseId}`}
+              <Link key={i} to={`/module/${c.courseId}`}
                     className="text-[10px] px-2 py-1 rounded-full bg-blue-50 text-primary border border-blue-100 hover:bg-blue-100 transition-colors flex items-center gap-1">
                 <BookOpen className="w-2.5 h-2.5" />
                 {c.topicTitle} <ArrowRight className="w-2.5 h-2.5" />

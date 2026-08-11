@@ -15,14 +15,12 @@ import Store           from './pages/Store'
 import Team            from './pages/Team'
 import Contact         from './pages/Contact'
 import Login           from './pages/Login'
-import Checkout        from './pages/Checkout'
-import CheckoutSuccess from './pages/CheckoutSuccess'
 import MyCourses       from './pages/MyCourses'
-import CourseViewer    from './pages/CourseViewer'
 import Admin           from './pages/Admin'
 import Dashboard       from './pages/Dashboard'
 import CustomCourseBuilder from './pages/CustomCourseBuilder'
 import CustomCoursePlayer  from './pages/CustomCoursePlayer'
+import CourseDetail        from './pages/CourseDetail'
 
 function PageTransition({ children }) {
   return (
@@ -46,7 +44,6 @@ export default function App() {
     location.pathname === '/login'
   const noNavFooter =
     noChrome ||
-    location.pathname.startsWith('/learn') ||
     /^\/custom-course\/[^/]+$/.test(location.pathname)   // hide chrome only in the playlist player, not the builder
 
   return (
@@ -61,23 +58,24 @@ export default function App() {
 
           {/* ── Public ── */}
           <Route path="/"        element={<PageTransition><Home /></PageTransition>} />
-          <Route path="/store"   element={<PageTransition><Store /></PageTransition>} />
           <Route path="/team"    element={<PageTransition><Team /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/login"   element={<PageTransition><Login /></PageTransition>} />
 
-          {/* Legacy redirects */}
-          <Route path="/booking" element={<PageTransition><Store /></PageTransition>} />
-          <Route path="/courses" element={<PageTransition><Store /></PageTransition>} />
-
           {/* ── Protected (any logged-in user) ── */}
-          <Route path="/checkout/:courseId"          element={<ProtectedRoute><PageTransition><Checkout /></PageTransition></ProtectedRoute>} />
-          <Route path="/checkout/:courseId/success"  element={<ProtectedRoute><PageTransition><CheckoutSuccess /></PageTransition></ProtectedRoute>} />
+          {/* Store — all three URL levels + legacy aliases */}
+          <Route path="/store"                              element={<ProtectedRoute><PageTransition><Store /></PageTransition></ProtectedRoute>} />
+          <Route path="/store/:university/:subject"         element={<ProtectedRoute><PageTransition><Store /></PageTransition></ProtectedRoute>} />
+          <Route path="/store/:university/:subject/:track"  element={<ProtectedRoute><PageTransition><Store /></PageTransition></ProtectedRoute>} />
+          <Route path="/booking"                            element={<ProtectedRoute><PageTransition><Store /></PageTransition></ProtectedRoute>} />
+          <Route path="/courses"                            element={<ProtectedRoute><PageTransition><Store /></PageTransition></ProtectedRoute>} />
+          {/* Module detail */}
+          <Route path="/module/:courseId"                   element={<ProtectedRoute><PageTransition><CourseDetail /></PageTransition></ProtectedRoute>} />
+          {/* Other protected pages */}
           <Route path="/my-courses"                  element={<ProtectedRoute><PageTransition><MyCourses /></PageTransition></ProtectedRoute>} />
           <Route path="/dashboard"                   element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
-<Route path="/custom-course"               element={<ProtectedRoute><PageTransition><CustomCourseBuilder /></PageTransition></ProtectedRoute>} />
+          <Route path="/custom-course"               element={<ProtectedRoute><PageTransition><CustomCourseBuilder /></PageTransition></ProtectedRoute>} />
           <Route path="/custom-course/:playlistId"   element={<ProtectedRoute><CustomCoursePlayer /></ProtectedRoute>} />
-          <Route path="/learn/:courseId"             element={<ProtectedRoute><CourseViewer /></ProtectedRoute>} />
 
           {/* ── Admin only ── */}
           <Route path="/admin-nexus" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />

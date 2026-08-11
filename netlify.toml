@@ -35,18 +35,3 @@
   for = "/index.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
-
-[functions."study-buddy"]
-  timeout = 26
-
-[functions."parse-syllabus"]
-  timeout = 26
-
-[functions."build-custom-playlist"]
-  timeout = 26
-
-[functions."create-paymob-order"]
-  timeout = 10
-
-[functions."paymob-webhook"]
-  timeout = 10
