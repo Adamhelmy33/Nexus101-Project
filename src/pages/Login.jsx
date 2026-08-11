@@ -248,10 +248,10 @@ export default function Login() {
                       selected={form.referralSource}
                       onChange={val => set('referralSource', val)}
                       options={[
-                        { value: 'Friend/Referral', label: 'Friend / Referral' },
-                        { value: 'WhatsApp Group', label: 'WhatsApp Group' },
-                        { value: 'Instagram', label: 'Instagram' },
-                        { value: 'Other', label: 'Other' },
+                        { value: 'friend_referral', label: 'Friend / Referral' },
+                        { value: 'whatsapp_group', label: 'WhatsApp Group' },
+                        { value: 'instagram', label: 'Instagram' },
+                        { value: 'other', label: 'Other' },
                       ]}
                     />
 
@@ -262,11 +262,11 @@ export default function Login() {
                       selected={form.highSchoolSystem}
                       onChange={val => set('highSchoolSystem', val)}
                       options={[
-                        { value: 'IGCSE', label: 'IGCSE' },
-                        { value: 'American', label: 'American' },
-                        { value: 'Thanweya Amma', label: 'Thanweya Amma' },
-                        { value: 'IB', label: 'IB' },
-                        { value: 'Other', label: 'Other' },
+                        { value: 'igcse', label: 'IGCSE' },
+                        { value: 'american', label: 'American' },
+                        { value: 'thanweya_amma', label: 'Thanweya Amma' },
+                        { value: 'ib', label: 'IB' },
+                        { value: 'other', label: 'Other' },
                       ]}
                     />
 
