@@ -211,7 +211,7 @@ export async function getAllUsers() {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, name, role, created_at, major_subject, major_study_level')
+      .select('id, email, name, role, created_at, major_subject, major_study_level, whatsapp_number, is_returning_student, referral_source, high_school_system')
       .order('created_at', { ascending: false })
     if (error) { console.warn('[auth] getAllUsers profiles failed:', error.message); return [] }
     profiles = data || []
@@ -244,14 +244,18 @@ export async function getAllUsers() {
   }
 
   return profiles.map(p => ({
-    id:              p.id,
-    email:           p.email,
-    name:            p.name,
-    isAdmin:         p.role === 'admin',
-    registeredAt:    p.created_at,
-    majorSubject:    p.major_subject ?? null,
-    majorStudyLevel: p.major_study_level ?? null,
-    purchases:       byUser.get(p.id) || [],
+    id:                 p.id,
+    email:              p.email,
+    name:               p.name,
+    isAdmin:            p.role === 'admin',
+    registeredAt:       p.created_at,
+    majorSubject:       p.major_subject ?? null,
+    majorStudyLevel:    p.major_study_level ?? null,
+    whatsappNumber:     p.whatsapp_number ?? null,
+    isReturningStudent: p.is_returning_student ?? null,
+    referralSource:     p.referral_source ?? null,
+    highSchoolSystem:   p.high_school_system ?? null,
+    purchases:          byUser.get(p.id) || [],
   }))
 }
 

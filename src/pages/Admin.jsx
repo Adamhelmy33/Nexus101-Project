@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import {
   DollarSign, Users, Activity, BookOpen, Search, Download,
   TrendingUp, Calendar, ShoppingCart, Eye, ChevronDown, LogOut,
+  Phone, MessageCircle,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getAllUsers, getAdminMetrics, getActiveViewers } from '../lib/auth'
@@ -22,6 +23,31 @@ const MAJOR_GROUPS = [
   { id: 'pharm-ifp', title: 'Pharmacy — IFP', subject: 'pharmacy', level: 'ifp' },
   { id: 'unspecified', title: 'Not specified', isUnspecified: true },
 ]
+
+const HIGH_SCHOOL_LABELS = {
+  igcse: 'IGCSE',
+  american: 'American',
+  thanweya_amma: 'Thanweya Amma',
+  ib: 'IB',
+  other: 'Other',
+}
+
+const REFERRAL_LABELS = {
+  friend_referral: 'Friend / Referral',
+  whatsapp_group: 'WhatsApp Group',
+  instagram: 'Instagram',
+  other: 'Other',
+}
+
+function formatHighSchool(slug) {
+  if (!slug) return '—'
+  return HIGH_SCHOOL_LABELS[slug] || slug
+}
+
+function formatReferral(slug) {
+  if (!slug) return '—'
+  return REFERRAL_LABELS[slug] || slug
+}
 
 export default function Admin() {
   const { user, logout } = useAuth()
@@ -327,26 +353,79 @@ export default function Admin() {
                   <table className="w-full text-sm">
                     <thead style={{ background: '#f8faff' }}>
                       <tr className="text-left text-xs text-gray-500 uppercase tracking-wider">
-                        <th className="px-6 py-3 font-semibold">Name / Email</th>
-                        <th className="px-6 py-3 font-semibold">Modules owned</th>
-                        <th className="px-6 py-3 font-semibold">Status</th>
-                        <th className="px-6 py-3 font-semibold">Registered</th>
+                        <th className="px-6 py-3 font-semibold whitespace-nowrap">Name / Email</th>
+                        <th className="px-6 py-3 font-semibold whitespace-nowrap">WhatsApp</th>
+                        <th className="px-6 py-3 font-semibold whitespace-nowrap">Returning</th>
+                        <th className="px-6 py-3 font-semibold whitespace-nowrap">Referral</th>
+                        <th className="px-6 py-3 font-semibold whitespace-nowrap">High School</th>
+                        <th className="px-6 py-3 font-semibold whitespace-nowrap">Modules</th>
+                        <th className="px-6 py-3 font-semibold whitespace-nowrap">Status</th>
+                        <th className="px-6 py-3 font-semibold whitespace-nowrap">Registered</th>
                       </tr>
                     </thead>
                     <tbody>
                       {group.users.map((u, i) => {
                         const isLive = activeViewers.includes(u.email)
+                        const cleanPhone = u.whatsappNumber ? u.whatsappNumber.replace(/[^0-9+]/g, '') : null
+                        const waLink = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : null
+
                         return (
-                          <tr key={i} className="border-t border-gray-100">
-                            <td className="px-6 py-3">
+                          <tr key={i} className="border-t border-gray-100 hover:bg-slate-50/50 transition-colors">
+                            <td className="px-6 py-3.5 whitespace-nowrap">
                               <p className="font-medium text-gray-900 text-sm">{u.name || '—'}</p>
                               <p className="text-xs text-gray-400">{u.email}</p>
                             </td>
-                            <td className="px-6 py-3">
+                            <td className="px-6 py-3.5 whitespace-nowrap">
+                              {waLink ? (
+                                <a
+                                  href={waLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                  <span>{u.whatsappNumber}</span>
+                                </a>
+                              ) : (
+                                <span className="text-xs text-gray-400">—</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-3.5 whitespace-nowrap">
+                              {u.isReturningStudent === true ? (
+                                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  Yes
+                                </span>
+                              ) : u.isReturningStudent === false ? (
+                                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-50 text-gray-600 border border-gray-200">
+                                  No
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-400">—</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-3.5 whitespace-nowrap">
+                              {u.referralSource ? (
+                                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                  {formatReferral(u.referralSource)}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-400">—</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-3.5 whitespace-nowrap">
+                              {u.highSchoolSystem ? (
+                                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-purple-50 text-purple-700 border border-purple-100">
+                                  {formatHighSchool(u.highSchoolSystem)}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-400">—</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-3.5 whitespace-nowrap">
                               <span className="text-gray-700 font-semibold">{(u.purchases || []).length}</span>
                               <span className="text-xs text-gray-400 ml-1">module{(u.purchases || []).length !== 1 ? 's' : ''}</span>
                             </td>
-                            <td className="px-6 py-3">
+                            <td className="px-6 py-3.5 whitespace-nowrap">
                               {u.isAdmin ? (
                                 <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: '#fef3c7', color: '#92400e' }}>Admin</span>
                               ) : isLive ? (
@@ -358,7 +437,7 @@ export default function Admin() {
                                 <span className="text-xs text-gray-400">Offline</span>
                               )}
                             </td>
-                            <td className="px-6 py-3 text-gray-500 text-xs">
+                            <td className="px-6 py-3.5 text-gray-500 text-xs whitespace-nowrap">
                               {new Date(u.registeredAt).toLocaleDateString()}
                             </td>
                           </tr>

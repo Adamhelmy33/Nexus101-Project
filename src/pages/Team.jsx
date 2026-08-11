@@ -198,18 +198,7 @@ function InstructorCard({ ins }) {
         </h3>
         <p className="text-xs font-semibold text-primary uppercase tracking-wider mt-0.5">{ins.role}</p>
         <p className="text-xs text-gray-400 mb-3">{ins.subject}</p>
-        <p className="text-sm text-gray-600 leading-relaxed mb-4">{ins.bio}</p>
-
-        <div className="flex items-center gap-3 text-xs mt-auto pt-4 border-t border-gray-100 w-full justify-center">
-          <span className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-            <span className="font-semibold text-gray-700">{ins.rating}</span>
-          </span>
-          <span className="text-gray-300">·</span>
-          <span className="text-gray-500">
-            <span className="font-semibold text-gray-700">{ins.students.toLocaleString()}</span> students
-          </span>
-        </div>
+        <p className="text-sm text-gray-600 leading-relaxed">{ins.bio}</p>
       </div>
     </motion.div>
   )

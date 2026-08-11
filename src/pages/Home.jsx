@@ -102,15 +102,7 @@ function InstructorMiniCard({ ins }) {
         {ins.name}
       </p>
       <p className="text-xs font-semibold text-primary uppercase tracking-wide mt-0.5">{ins.role}</p>
-      <p className="text-xs text-gray-400 mt-1 mb-3">{ins.subject}</p>
-
-      <div className="flex items-center gap-1 text-xs text-gray-500 mt-auto">
-        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-        <span className="font-semibold text-gray-700">{ins.rating}</span>
-        <span className="text-gray-400">· {ins.students.toLocaleString()} students</span>
-      </div>
-
-      <div className="flex flex-wrap gap-1 mt-3 justify-center">
+      <div className="flex flex-wrap gap-1 mt-auto justify-center">
         {ins.universities.map(u => (
           <span key={u} className="text-[10px] px-2 py-0.5 rounded-full font-mono bg-primary/10 text-primary">{u}</span>
         ))}
