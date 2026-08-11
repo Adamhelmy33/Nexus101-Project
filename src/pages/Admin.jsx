@@ -14,6 +14,15 @@ const EMPTY_METRICS = {
   perCourse: [], totalUsers: 0,
 }
 
+const MAJOR_GROUPS = [
+  { id: 'eng-ifp', title: 'Engineering — IFP', subject: 'engineering', level: 'ifp' },
+  { id: 'eng-l4', title: 'Engineering — Level 4', subject: 'engineering', level: 'level-4' },
+  { id: 'phys-ifp', title: 'Physiotherapy — IFP', subject: 'physiotherapy', level: 'ifp' },
+  { id: 'phys-l4', title: 'Physiotherapy — Level 4', subject: 'physiotherapy', level: 'level-4' },
+  { id: 'pharm-ifp', title: 'Pharmacy — IFP', subject: 'pharmacy', level: 'ifp' },
+  { id: 'unspecified', title: 'Not specified', isUnspecified: true },
+]
+
 export default function Admin() {
   const { user, logout } = useAuth()
   const [allUsers, setAllUsers]       = useState([])
@@ -22,6 +31,21 @@ export default function Admin() {
   const [loading, setLoading]         = useState(true)
   const [search, setSearch]           = useState('')
   const [filterCourse, setFilterCourse] = useState('all')
+
+  /* ── Group users by major_subject + major_study_level ── */
+  const groupedUsers = MAJOR_GROUPS.map(group => {
+    let users
+    if (group.isUnspecified) {
+      users = allUsers.filter(u =>
+        !u.majorSubject ||
+        !u.majorStudyLevel ||
+        !MAJOR_GROUPS.some(g => !g.isUnspecified && g.subject === u.majorSubject && g.level === u.majorStudyLevel)
+      )
+    } else {
+      users = allUsers.filter(u => u.majorSubject === group.subject && u.majorStudyLevel === group.level)
+    }
+    return { ...group, users }
+  })
 
   /* ── Fetch live data from Supabase, refresh every 10s ── */
   useEffect(() => {
@@ -272,59 +296,80 @@ export default function Admin() {
           )}
         </motion.div>
 
-        {/* ── All users list ── */}
+        {/* ── All users list grouped by major ── */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-8">
-          <div className="p-6" style={{ borderBottom: '1px solid #f1f5f9' }}>
-            <h2 className="font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-              All registered users
-            </h2>
-            <p className="text-xs text-gray-400 mt-0.5">{allUsers.length} total</p>
+                    className="mt-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+                All registered users
+              </h2>
+              <p className="text-xs text-gray-400 mt-0.5">{allUsers.length} total users across majors</p>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead style={{ background: '#f8faff' }}>
-                <tr className="text-left text-xs text-gray-500 uppercase tracking-wider">
-                  <th className="px-6 py-3 font-semibold">Name / Email</th>
-                  <th className="px-6 py-3 font-semibold">Modules owned</th>
-                  <th className="px-6 py-3 font-semibold">Status</th>
-                  <th className="px-6 py-3 font-semibold">Registered</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allUsers.map((u, i) => {
-                  const isLive = activeViewers.includes(u.email)
-                  return (
-                    <tr key={i} className="border-t border-gray-100">
-                      <td className="px-6 py-3">
-                        <p className="font-medium text-gray-900 text-sm">{u.name || '—'}</p>
-                        <p className="text-xs text-gray-400">{u.email}</p>
-                      </td>
-                      <td className="px-6 py-3">
-                        <span className="text-gray-700 font-semibold">{(u.purchases || []).length}</span>
-                        <span className="text-xs text-gray-400 ml-1">module{(u.purchases || []).length !== 1 ? 's' : ''}</span>
-                      </td>
-                      <td className="px-6 py-3">
-                        {u.isAdmin ? (
-                          <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: '#fef3c7', color: '#92400e' }}>Admin</span>
-                        ) : isLive ? (
-                          <span className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-full font-medium w-fit" style={{ background: '#dcfce7', color: '#15803d' }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            Online
-                          </span>
-                        ) : (
-                          <span className="text-xs text-gray-400">Offline</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-3 text-gray-500 text-xs">
-                        {new Date(u.registeredAt).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+
+          {groupedUsers.map(group => (
+            <div key={group.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-6 flex items-center justify-between" style={{ borderBottom: '1px solid #f1f5f9' }}>
+                <h3 className="font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  {group.title}
+                </h3>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-primary border border-blue-100">
+                  {group.users.length} student{group.users.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+              {group.users.length === 0 ? (
+                <div className="p-6 text-center text-xs text-gray-400">
+                  No students registered in this group yet.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead style={{ background: '#f8faff' }}>
+                      <tr className="text-left text-xs text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 font-semibold">Name / Email</th>
+                        <th className="px-6 py-3 font-semibold">Modules owned</th>
+                        <th className="px-6 py-3 font-semibold">Status</th>
+                        <th className="px-6 py-3 font-semibold">Registered</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.users.map((u, i) => {
+                        const isLive = activeViewers.includes(u.email)
+                        return (
+                          <tr key={i} className="border-t border-gray-100">
+                            <td className="px-6 py-3">
+                              <p className="font-medium text-gray-900 text-sm">{u.name || '—'}</p>
+                              <p className="text-xs text-gray-400">{u.email}</p>
+                            </td>
+                            <td className="px-6 py-3">
+                              <span className="text-gray-700 font-semibold">{(u.purchases || []).length}</span>
+                              <span className="text-xs text-gray-400 ml-1">module{(u.purchases || []).length !== 1 ? 's' : ''}</span>
+                            </td>
+                            <td className="px-6 py-3">
+                              {u.isAdmin ? (
+                                <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: '#fef3c7', color: '#92400e' }}>Admin</span>
+                              ) : isLive ? (
+                                <span className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-full font-medium w-fit" style={{ background: '#dcfce7', color: '#15803d' }}>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                  Online
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-400">Offline</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-3 text-gray-500 text-xs">
+                              {new Date(u.registeredAt).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
         </motion.div>
       </div>
     </div>

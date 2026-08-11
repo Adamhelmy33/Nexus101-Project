@@ -103,21 +103,55 @@ export async function logout() {
 }
 
 /* ── Register ────────────────────────────────── */
-export async function register({ email, password, name }) {
-  email = (email || '').toLowerCase().trim()
+export async function register(formData) {
+  const {
+    email: rawEmail,
+    password,
+    name,
+    whatsappNumber,
+    isReturningStudent,
+    referralSource,
+    highSchoolSystem,
+    major,
+  } = formData || {}
+
+  const email = (rawEmail || '').toLowerCase().trim()
   if (!email || !password || !name)
-    return { ok: false, error: 'Please fill in all fields.' }
-  if (!/\S+@\S+\.\S+/.test(email))
-    return { ok: false, error: 'Please enter a valid email.' }
+    return { ok: false, error: 'Please fill in all required fields.' }
+  if (!email.endsWith('@gmail.com'))
+    return { ok: false, error: 'Email address must end with @gmail.com.' }
   if (password.length < 6)
     return { ok: false, error: 'Password must be at least 6 characters.' }
+  if (!whatsappNumber?.trim())
+    return { ok: false, error: 'Please enter your WhatsApp number.' }
+  if (isReturningStudent === undefined || isReturningStudent === null || isReturningStudent === '')
+    return { ok: false, error: 'Please indicate if you are a returning student.' }
+  if (!referralSource)
+    return { ok: false, error: 'Please select how you heard about us.' }
+  if (!highSchoolSystem)
+    return { ok: false, error: 'Please select your high school system.' }
+  if (!major)
+    return { ok: false, error: 'Please choose your major.' }
+
+  const [majorSubject, majorStudyLevel] = major.split('/')
+  const isReturningBool = isReturningStudent === 'yes' || isReturningStudent === true
 
   let data, error
   try {
     ({ data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: {
+        data: {
+          name,
+          whatsapp_number: whatsappNumber.trim(),
+          is_returning_student: isReturningBool,
+          referral_source: referralSource,
+          high_school_system: highSchoolSystem,
+          major_subject: majorSubject,
+          major_study_level: majorStudyLevel,
+        },
+      },
     }))
   } catch (err) {
     console.warn('[auth] signUp threw:', err)
@@ -177,7 +211,7 @@ export async function getAllUsers() {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, name, role, created_at')
+      .select('id, email, name, role, created_at, major_subject, major_study_level')
       .order('created_at', { ascending: false })
     if (error) { console.warn('[auth] getAllUsers profiles failed:', error.message); return [] }
     profiles = data || []
@@ -210,12 +244,14 @@ export async function getAllUsers() {
   }
 
   return profiles.map(p => ({
-    id:           p.id,
-    email:        p.email,
-    name:         p.name,
-    isAdmin:      p.role === 'admin',
-    registeredAt: p.created_at,
-    purchases:    byUser.get(p.id) || [],
+    id:              p.id,
+    email:           p.email,
+    name:            p.name,
+    isAdmin:         p.role === 'admin',
+    registeredAt:    p.created_at,
+    majorSubject:    p.major_subject ?? null,
+    majorStudyLevel: p.major_study_level ?? null,
+    purchases:       byUser.get(p.id) || [],
   }))
 }
 
