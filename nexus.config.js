@@ -52,17 +52,6 @@ const nexusConfig = {
   paymob: {},
 
 
-  /* ═════════════════════════════════════════════════════════════════
-     4.  CUSTOM COURSE GENERATOR  (AI-built playlists from syllabi)
-     ═════════════════════════════════════════════════════════════════
-     Set generationCostPoints to 0 to make it free for any logged-in user,
-     or to e.g. 500 to charge 500 EGP per playlist build.
-     ───────────────────────────────────────────────────────────────── */
-  customCourse: {
-    generationCostPoints: 0,        // free for now
-    maxSegmentsPerPlaylist: 12,     // cap so playlists stay focused
-    minMatchScore: 0.45,            // lower = more permissive RAG matches
-  },
 
 
   /* ═════════════════════════════════════════════════════════════════

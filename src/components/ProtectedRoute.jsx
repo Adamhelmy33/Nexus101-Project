@@ -23,7 +23,7 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
   }
 
   if (adminOnly && !isAdmin) {
-    return <Navigate to="/my-courses" replace />
+    return <Navigate to="/store" replace />
   }
 
   return children

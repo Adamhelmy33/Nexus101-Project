@@ -5,7 +5,6 @@ import {
   UNIVERSITIES as STATIC_UNIVERSITIES,
   INSTRUCTORS as STATIC_INSTRUCTORS,
 } from '../data/constants'
-import { hydrateCourseCache } from '../lib/courseCache'
 
 // ── Gradient fallback palette for DB rows missing gradient columns ─────────────
 const GRADIENTS = [
@@ -152,7 +151,6 @@ function fetchDbCatalog() {
     const instructors = dbI ? dbI.map(normalizeDbInstructor) : STATIC_INSTRUCTORS
 
     _cache = { courses, universities, instructors }
-    hydrateCourseCache(courses)
     return _cache
   }).catch((err) => {
     console.warn('[useCatalog] catastrophic failure, using static fallback:', err)
@@ -162,7 +160,6 @@ function fetchDbCatalog() {
       instructors: STATIC_INSTRUCTORS,
     }
     _cache = fallback
-    hydrateCourseCache(STATIC_COURSES)
     return fallback
   })
 

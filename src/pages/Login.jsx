@@ -29,7 +29,7 @@ export default function Login() {
   const { login, register } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const redirectTo = location.state?.from || '/my-courses'
+  const redirectTo = location.state?.from || '/store'
 
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setError('') }
 

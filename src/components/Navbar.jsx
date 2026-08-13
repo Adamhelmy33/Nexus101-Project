@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Menu, X, ShoppingCart, BookOpen, LogOut, LayoutDashboard, ChevronDown,
-  BarChart3,
+  Menu, X, ShoppingCart, LogOut, LayoutDashboard, ChevronDown,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -136,19 +135,6 @@ export default function Navbar() {
                   </Link>
                 )
               })}
-              {isLoggedIn && (
-                <Link
-                  to="/my-courses"
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    location.pathname.startsWith('/my-courses') || location.pathname.startsWith('/learn')
-                      ? 'bg-primary text-white shadow-md'
-                      : `${linkColor} hover:bg-primary hover:text-white`
-                  }`}
-                >
-                  <BookOpen className="w-4 h-4" />
-                  My Courses
-                </Link>
-              )}
             </div>
 
             {/* ── Right side ── */}
@@ -205,12 +191,6 @@ export default function Navbar() {
                           <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
                           <p className="text-xs text-gray-500 truncate">{user.email}</p>
                         </div>
-                        <Link to="/my-courses" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">
-                          <BookOpen className="w-4 h-4 text-primary" /> My Courses
-                        </Link>
-                        <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">
-                          <BarChart3 className="w-4 h-4 text-primary" /> My Dashboard
-                        </Link>
 {isAdmin && (
                           <Link to="/admin-nexus" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50">
                             <LayoutDashboard className="w-4 h-4 text-primary" /> Admin Dashboard
@@ -271,12 +251,6 @@ export default function Navbar() {
 
               {isLoggedIn && (
                 <>
-                  <Link to="/my-courses" className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary/10 hover:text-primary">
-                    <BookOpen className="w-4 h-4" /> My Courses
-                  </Link>
-                  <Link to="/dashboard" className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary/10 hover:text-primary">
-                    <BarChart3 className="w-4 h-4" /> Dashboard
-                  </Link>
 {isAdmin && (
                     <Link to="/admin-nexus" className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary/10 hover:text-primary">
                       <LayoutDashboard className="w-4 h-4" /> Admin

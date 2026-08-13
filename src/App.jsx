@@ -15,11 +15,7 @@ import Store           from './pages/Store'
 import Team            from './pages/Team'
 import Contact         from './pages/Contact'
 import Login           from './pages/Login'
-import MyCourses       from './pages/MyCourses'
 import Admin           from './pages/Admin'
-import Dashboard       from './pages/Dashboard'
-import CustomCourseBuilder from './pages/CustomCourseBuilder'
-import CustomCoursePlayer  from './pages/CustomCoursePlayer'
 import CourseDetail        from './pages/CourseDetail'
 
 function PageTransition({ children }) {
@@ -42,9 +38,7 @@ export default function App() {
   const noChrome =
     location.pathname.startsWith('/admin-nexus') ||
     location.pathname === '/login'
-  const noNavFooter =
-    noChrome ||
-    /^\/custom-course\/[^/]+$/.test(location.pathname)   // hide chrome only in the playlist player, not the builder
+  const noNavFooter = noChrome
 
   return (
     <div className="min-h-screen bg-white">
@@ -71,11 +65,7 @@ export default function App() {
           <Route path="/courses"                            element={<ProtectedRoute><PageTransition><Store /></PageTransition></ProtectedRoute>} />
           {/* Module detail */}
           <Route path="/module/:courseId"                   element={<ProtectedRoute><PageTransition><CourseDetail /></PageTransition></ProtectedRoute>} />
-          {/* Other protected pages */}
-          <Route path="/my-courses"                  element={<ProtectedRoute><PageTransition><MyCourses /></PageTransition></ProtectedRoute>} />
-          <Route path="/dashboard"                   element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
-          <Route path="/custom-course"               element={<ProtectedRoute><PageTransition><CustomCourseBuilder /></PageTransition></ProtectedRoute>} />
-          <Route path="/custom-course/:playlistId"   element={<ProtectedRoute><CustomCoursePlayer /></ProtectedRoute>} />
+
 
           {/* ── Admin only ── */}
           <Route path="/admin-nexus" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />

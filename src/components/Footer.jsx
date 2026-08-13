@@ -8,7 +8,6 @@ const FOOTER_LINKS = {
     { label: 'Home',          to: '/' },
     { label: 'Revision Store', to: '/store' },
     { label: 'Our Team',      to: '/team' },
-    { label: 'My Courses',    to: '/my-courses' },
   ],
   Modules: [
     { label: 'Mathematics',      to: '/store' },
