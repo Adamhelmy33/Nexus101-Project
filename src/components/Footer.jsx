@@ -10,9 +10,11 @@ const FOOTER_LINKS = {
     { label: 'Our Team',      to: '/team' },
   ],
   Modules: [
-    { label: 'Mathematics',      to: '/store' },
-    { label: 'Physics',          to: '/store' },
-    { label: 'Computer Science', to: '/store' },
+    { label: 'Engineering (IFP)',       to: '/store/uh/engineering/ifp' },
+    { label: 'Engineering (Level 4)',   to: '/store/uh/engineering/level-4' },
+    { label: 'Physiotherapy (IFP)',     to: '/store/uh/physiotherapy/ifp' },
+    { label: 'Physiotherapy (Level 4)', to: '/store/uh/physiotherapy/level-4' },
+    { label: 'Pharmacy (IFP)',          to: '/store/uh/pharmacy/ifp' },
   ],
   Support: [
     { label: 'WhatsApp Support', href: `https://wa.me/${WHATSAPP_NUMBER}` },
@@ -34,7 +36,7 @@ export default function Footer() {
               <Logo variant="white" height={36} className="transition-transform group-hover:scale-105" />
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-              World-class Math, Physics & Computer Science education, built for Egyptian students by Egyptian educators.
+              High-intensity revision built by UH's top-performing students — real notes, real strategies, real results. Engineering, Physiotherapy & Pharmacy, IFP through Level 4.
             </p>
 
             <div className="mt-6 flex flex-col gap-3">
