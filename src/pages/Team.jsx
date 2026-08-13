@@ -10,7 +10,7 @@ import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 }
 const stagger = { show: { transition: { staggerChildren: 0.12 } } }
 
@@ -18,12 +18,12 @@ const stagger = { show: { transition: { staggerChildren: 0.12 } } }
 function FounderCard({ founder }) {
   return (
     <motion.div variants={fadeUp}
-                whileHover={{ y: -4 }}
-                className="rounded-3xl overflow-hidden bg-white shadow-lg border border-gray-100 transition-shadow hover:shadow-2xl">
+      whileHover={{ y: -4 }}
+      className="rounded-3xl overflow-hidden bg-white shadow-lg border border-gray-100 transition-shadow hover:shadow-2xl">
       <div className="relative h-64 flex flex-col items-center justify-center p-6 overflow-hidden"
-           style={{ background: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientTo})` }}>
+        style={{ background: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientTo})` }}>
         <div className="absolute inset-0 opacity-10"
-             style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+          style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
         <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/10" />
 
         <Avatar
@@ -52,7 +52,7 @@ function FounderCard({ founder }) {
         </p>
 
         <blockquote className="text-sm text-gray-600 italic leading-relaxed mb-5 p-4 rounded-xl"
-                    style={{ background: '#f8faff', borderLeft: `3px solid ${founder.gradientFrom}` }}>
+          style={{ background: '#f8faff', borderLeft: `3px solid ${founder.gradientFrom}` }}>
           {founder.quote}
         </blockquote>
 
@@ -79,7 +79,7 @@ function FounderCard({ founder }) {
           <div className="flex flex-wrap gap-2">
             {founder.subjects.map(s => (
               <span key={s} className="text-xs px-3 py-1 rounded-full font-medium text-white"
-                    style={{ background: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientTo})` }}>
+                style={{ background: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientTo})` }}>
                 {s}
               </span>
             ))}
@@ -164,17 +164,17 @@ function TeamMemberCard({ member }) {
 function InstructorCard({ ins }) {
   return (
     <motion.div variants={fadeUp}
-                whileHover={{ y: -4 }}
-                className="rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden flex flex-col transition-shadow hover:shadow-xl">
+      whileHover={{ y: -4 }}
+      className="rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden flex flex-col transition-shadow hover:shadow-xl">
       <div className="relative h-36 flex items-end p-4 overflow-hidden"
-           style={{ background: `linear-gradient(135deg, ${ins.gradientFrom}, ${ins.gradientTo})` }}>
+        style={{ background: `linear-gradient(135deg, ${ins.gradientFrom}, ${ins.gradientTo})` }}>
         <div className="absolute inset-0 opacity-15"
-             style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+          style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10" />
         <div className="flex flex-wrap gap-1 relative z-10">
           {ins.universities.map(u => (
             <span key={u} className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md backdrop-blur-sm text-white"
-                  style={{ background: 'rgba(0,0,0,0.25)' }}>
+              style={{ background: 'rgba(0,0,0,0.25)' }}>
               {u}
             </span>
           ))}
@@ -211,22 +211,22 @@ export default function Team() {
     <div>
       {/* ── Hero ── */}
       <div className="pt-36 sm:pt-28 pb-16 text-center relative overflow-hidden"
-           style={{ background: 'linear-gradient(135deg, #0a1628 0%, #003380 60%, #0047AB 100%)' }}>
+        style={{ background: 'linear-gradient(135deg, #0a1628 0%, #003380 60%, #0047AB 100%)' }}>
         <div className="absolute inset-0 opacity-5"
-             style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+          style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
         <div className="relative max-w-3xl mx-auto px-4">
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                    className="text-primary-light font-semibold text-xs sm:text-sm uppercase tracking-widest mb-4">
+            className="text-primary-light font-semibold text-xs sm:text-sm uppercase tracking-widest mb-4">
             The People
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                     className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4"
-                     style={{ fontFamily: 'Playfair Display, serif' }}>
+            className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4"
+            style={{ fontFamily: 'Playfair Display, serif' }}>
             Meet the Team
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
-            One founder, five instructors, one mission — your university success.
+            className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
+            One founder, Eleven instructors, one mission — your university success.
           </motion.p>
         </div>
         <svg className="absolute bottom-0 left-0 right-0" viewBox="0 0 1440 50" fill="none">
@@ -239,7 +239,7 @@ export default function Team() {
         {/* ── Founders ── */}
         <section className="mb-20">
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                      className="text-center mb-12">
+            className="text-center mb-12">
             <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Founders</p>
             <h2 className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
               The one who started Nexus 101
@@ -247,7 +247,7 @@ export default function Team() {
           </motion.div>
 
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-                      className="flex justify-center">
+            className="flex justify-center">
             <div className="w-full max-w-sm">
               {FOUNDERS.map(f => <FounderCard key={f.id} founder={f} />)}
             </div>
@@ -257,12 +257,12 @@ export default function Team() {
         {/* ── Instructors (6) ── */}
         <section className="mb-20">
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                      className="text-center mb-12">
+            className="text-center mb-12">
             <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
               <Users className="w-4 h-4" /> Instructors
             </p>
             <h2 className="text-3xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Five experts. One goal.
+              Eleven experts. One goal.
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               Each instructor specialises in a slice of the curriculum — and they all want one thing: high marks for you.
@@ -286,7 +286,7 @@ export default function Team() {
             </div>
           ) : (
             <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {instructors.map(ins => <InstructorCard key={ins.id} ins={ins} />)}
             </motion.div>
           )}
@@ -295,7 +295,7 @@ export default function Team() {
         {/* ── Wider team / designer ── */}
         <section className="mb-20">
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                      className="text-center mb-10">
+            className="text-center mb-10">
             <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Wider Team</p>
             <h2 className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
               The talent behind the brand
@@ -303,15 +303,15 @@ export default function Team() {
           </motion.div>
 
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {TEAM.map(member => <TeamMemberCard key={member.id} member={member} />)}
           </motion.div>
         </section>
 
         {/* ── Mission strip ── */}
         <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                    className="rounded-3xl p-10 text-center relative overflow-hidden"
-                    style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}>
+          className="rounded-3xl p-10 text-center relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}>
           <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/5" />
           <div className="relative">
             <h2 className="text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
