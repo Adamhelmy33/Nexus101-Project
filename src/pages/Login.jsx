@@ -15,7 +15,9 @@ const INITIAL_FORM = {
   whatsappNumber: '',
   isReturningStudent: '',
   referralSource: '',
+  referralSourceOther: '',
   highSchoolSystem: '',
+  highSchoolSystemOther: '',
   major: '',
 }
 
@@ -32,6 +34,24 @@ export default function Login() {
   const redirectTo = location.state?.from || '/store'
 
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setError('') }
+
+  const setReferralSource = (val) => {
+    setForm(f => ({
+      ...f,
+      referralSource: val,
+      referralSourceOther: val === 'other' ? f.referralSourceOther : '',
+    }))
+    setError('')
+  }
+
+  const setHighSchoolSystem = (val) => {
+    setForm(f => ({
+      ...f,
+      highSchoolSystem: val,
+      highSchoolSystemOther: val === 'other' ? f.highSchoolSystemOther : '',
+    }))
+    setError('')
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -70,8 +90,18 @@ export default function Login() {
         setBusy(false)
         return
       }
+      if (form.referralSource === 'other' && !form.referralSourceOther.trim()) {
+        setError('Please specify how you heard about us.')
+        setBusy(false)
+        return
+      }
       if (!form.highSchoolSystem) {
         setError('Please select your high school system.')
+        setBusy(false)
+        return
+      }
+      if (form.highSchoolSystem === 'other' && !form.highSchoolSystemOther.trim()) {
+        setError('Please specify your high school system.')
         setBusy(false)
         return
       }
@@ -82,11 +112,23 @@ export default function Login() {
       }
     }
 
+    const payload = mode === 'register'
+      ? {
+          ...form,
+          referralSource: form.referralSource === 'other'
+            ? `Other: ${form.referralSourceOther.trim()}`
+            : form.referralSource,
+          highSchoolSystem: form.highSchoolSystem === 'other'
+            ? `Other: ${form.highSchoolSystemOther.trim()}`
+            : form.highSchoolSystem,
+        }
+      : form
+
     let res
     try {
       res = mode === 'login'
         ? await login(form.email, form.password)
-        : await register(form)
+        : await register(payload)
     } catch (err) {
       console.warn('[Login] submit threw:', err)
       setBusy(false)
@@ -246,13 +288,17 @@ export default function Login() {
                       label="How did you hear about us?"
                       name="referralSource"
                       selected={form.referralSource}
-                      onChange={val => set('referralSource', val)}
+                      onChange={setReferralSource}
                       options={[
                         { value: 'friend_referral', label: 'Friend / Referral' },
                         { value: 'whatsapp_group', label: 'WhatsApp Group' },
                         { value: 'instagram', label: 'Instagram' },
+                        { value: 'email', label: 'Email' },
                         { value: 'other', label: 'Other' },
                       ]}
+                      otherValue={form.referralSourceOther}
+                      onOtherChange={val => set('referralSourceOther', val)}
+                      otherPlaceholder="Please specify where you heard about us..."
                     />
 
                     <RadioField
@@ -260,7 +306,7 @@ export default function Login() {
                       label="High School System"
                       name="highSchoolSystem"
                       selected={form.highSchoolSystem}
-                      onChange={val => set('highSchoolSystem', val)}
+                      onChange={setHighSchoolSystem}
                       options={[
                         { value: 'igcse', label: 'IGCSE' },
                         { value: 'american', label: 'American' },
@@ -268,6 +314,9 @@ export default function Login() {
                         { value: 'ib', label: 'IB' },
                         { value: 'other', label: 'Other' },
                       ]}
+                      otherValue={form.highSchoolSystemOther}
+                      onOtherChange={val => set('highSchoolSystemOther', val)}
+                      otherPlaceholder="Please specify your high school system..."
                     />
 
                     <RadioField
@@ -330,7 +379,17 @@ function Field({ icon: Icon, label, sublabel, children }) {
   )
 }
 
-function RadioField({ icon: Icon, label, name, selected, onChange, options }) {
+function RadioField({
+  icon: Icon,
+  label,
+  name,
+  selected,
+  onChange,
+  options,
+  otherValue,
+  onOtherChange,
+  otherPlaceholder = 'Please specify...',
+}) {
   return (
     <div className="flex flex-col gap-2">
       <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
@@ -362,6 +421,28 @@ function RadioField({ icon: Icon, label, name, selected, onChange, options }) {
           )
         })}
       </div>
+
+      <AnimatePresence>
+        {selected === 'other' && onOtherChange && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-1">
+              <input
+                type="text"
+                value={otherValue || ''}
+                onChange={e => onOtherChange(e.target.value)}
+                placeholder={otherPlaceholder}
+                className={inputClass}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

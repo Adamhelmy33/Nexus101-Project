@@ -36,6 +36,7 @@ const REFERRAL_LABELS = {
   friend_referral: 'Friend / Referral',
   whatsapp_group: 'WhatsApp Group',
   instagram: 'Instagram',
+  email: 'Email',
   other: 'Other',
 }
 
