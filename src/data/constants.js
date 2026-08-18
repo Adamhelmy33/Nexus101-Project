@@ -42,7 +42,7 @@ export const UH_SUBJECTS = [
     gradientTo: '#0047AB',
     description: 'Maths, programming, digital electronics & mechanical science.',
     tracks: [
-      { id: 'ifp',     label: 'IFP',    description: 'International Foundation Programme modules.' },
+      { id: 'ifp', label: 'IFP', description: 'International Foundation Programme modules.' },
       { id: 'level-4', label: 'Level 4', description: 'First-year undergraduate modules.' },
     ],
   },
@@ -54,7 +54,7 @@ export const UH_SUBJECTS = [
     gradientTo: '#1a6fd4',
     description: 'Anatomy, physiology & clinical practice modules.',
     tracks: [
-      { id: 'ifp',     label: 'IFP',    description: 'International Foundation Programme modules.' },
+      { id: 'ifp', label: 'IFP', description: 'International Foundation Programme modules.' },
       { id: 'level-4', label: 'Level 4', description: 'First-year undergraduate modules.' },
     ],
   },
@@ -453,7 +453,7 @@ export const FOUNDERS = [
   {
     id: 'nagdy',
     name: 'Mohamed Nagdy',
-    role: 'Co-Founder & Lead Tutor',
+    role: 'Founder & Lead Tutor',
     subject: 'Physics & Computer Science',
     photo: '/founders/nagdy.jpg',
     initials: 'MN',
@@ -498,6 +498,17 @@ export const TEAM = [
     gradientFrom: '#0047AB',
     gradientTo: '#1a6fd4',
     bio: 'Web developer focused on building and improving the Nexus 101 platform experience, frontend systems, and scalable educational infrastructure.',
+  },
+  {
+    id: 'roqya',
+    name: 'Roqya Mazhar',
+    role: 'Social Media Manager',
+    department: 'Media & Community',
+    photo: null,
+    initials: 'RM',
+    gradientFrom: '#7C3AED',
+    gradientTo: '#9333EA',
+    bio: 'Manages Nexus 101\'s social presence and community engagement across platforms. Roqya focuses on connecting with students where they are and keeping the brand voice consistent and approachable across every channel.',
   },
 ]
 
@@ -569,14 +580,14 @@ export const INSTRUCTORS = [
   {
     id: 'ins-12',
     name: 'Mohra Ehab',
-    role: 'Instructor',
-    subject: 'Engineering Mathematics & Sciences',
+    role: 'Physics Instructor',
+    subject: 'Physics',
     photo: null,
     initials: 'ME',
     gradientFrom: '#0047AB', gradientTo: '#003380',
     universities: ['UH'],
     rating: null, students: null,
-    bio: 'Bio coming soon.',
+    bio: "Empowering students to master Physics by understanding the 'why' behind every concept. IFP graduate now studying Electrical & Electronic Engineering at the University of Hertfordshire, with hands-on experience in IoT, embedded systems, and sustainable engineering projects.",
   },
   {
     id: 'ins-13',
@@ -626,15 +637,28 @@ export const INSTRUCTORS = [
     rating: null, students: null,
     bio: 'Level 5 Physiotherapy student who recently completed Level 4. Understands the challenges students face and focuses on explaining concepts in a simple, practical, interactive, student-centered way.',
   },
+  {
+    id: 'ins-17',
+    name: 'Badr Mohamed Abd El-dayem Ibrahim',
+    role: 'Manufacturing Technology Instructor',
+    subject: 'Manufacturing Technology',
+    photo: null,
+    initials: 'BM',
+    gradientFrom: '#0047AB', gradientTo: '#003380',
+    universities: ['UH'],
+    rating: null, students: null,
+    bio: "Mechatronics Engineering student with hands-on experience in manufacturing, CAD/CATIA design, and hardware prototyping. I believe engineering is best learned by building — turning technical concepts into hands-on, buildable steps students can apply for themselves.",
+  },
 ]
 
 /* ── Stats shown on homepage ───────────────────── */
 export const STATS = [
-  { id: 'students', label: 'Students Helped', value: 2000, suffix: '+', description: 'and counting' },
-  { id: 'hours', label: 'Revision Hours', value: 500, suffix: '+', description: 'of expert teaching' },
-  { id: 'success', label: 'Pass Rate', value: 98, suffix: '%', description: 'students pass their modules' },
+  { id: 'students', label: 'Unique Students', value: 54, suffix: '', description: 'enrolled in Season 1' },
+  { id: 'sessions', label: 'Sessions Delivered', value: 27, suffix: '', description: 'live revision sessions completed' },
+  { id: 'success', label: 'Exam Pass Rate', value: 80, suffix: '%', description: 'of attending students passed' },
   { id: 'universities', label: 'Target University', value: 1, suffix: '', description: 'University of Hertfordshire' },
 ]
+
 
 /* ── Contact ──────────────────────────────────── */
 export const WHATSAPP_NUMBER = '201223262295'   // ← change to your real number

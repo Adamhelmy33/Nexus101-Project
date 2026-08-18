@@ -35,7 +35,7 @@ function normalizeDbCourse(row, idx) {
     price: row.price_egp ?? row.price_points ?? staticMatch?.price ?? 0,
     oldPrice: row.old_price_egp ?? staticMatch?.oldPrice ?? null,
     currency: row.currency ?? 'EGP',
-    duration: 'Lifetime access',
+
     modules: row.module_count ?? staticMatch?.modules ?? 0,
     hours: row.hours ?? staticMatch?.hours ?? 0,
     students: row.student_count ?? staticMatch?.students ?? 0,

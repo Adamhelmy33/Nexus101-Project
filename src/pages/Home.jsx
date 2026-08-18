@@ -2,9 +2,10 @@ import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useInView, useScroll, useTransform } from 'framer-motion'
 import {
-  ArrowRight, ShoppingCart, Users, Clock, Trophy, Layers,
-  CheckCircle2, ChevronRight, Star, Linkedin, Twitter,
+  ArrowRight, ShoppingCart, Users, Video, Trophy, Layers,
+  CheckCircle2, ChevronRight, Linkedin, Twitter,
   Zap, Target, Award, GraduationCap, Sparkles,
+  RefreshCw, XCircle, MessageCircle, BookOpen,
 } from 'lucide-react'
 import AnimatedCounter from '../components/AnimatedCounter'
 import Avatar from '../components/Avatar'
@@ -15,7 +16,7 @@ import { useCatalog } from '../hooks/useCatalog'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
-  show:   { opacity: 1, y: 0,  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 }
 const stagger = { show: { transition: { staggerChildren: 0.12 } } }
 
@@ -30,10 +31,67 @@ function Section({ children, className = '' }) {
 }
 
 const STAT_ICONS = {
-  students:     <Users className="w-7 h-7" />,
-  hours:        <Clock className="w-7 h-7" />,
-  success:      <Trophy className="w-7 h-7" />,
+  students: <Users className="w-7 h-7" />,
+  sessions: <Video className="w-7 h-7" />,
+  success: <Trophy className="w-7 h-7" />,
   universities: <GraduationCap className="w-7 h-7" />,
+}
+
+/* ── Season 1 supplementary stats (not in STATS constant) ── */
+const SEASON1_EXTRA = [
+  {
+    id: 'repeat',
+    icon: <RefreshCw className="w-6 h-6" />,
+    value: 40.7,
+    suffix: '%',
+    label: 'Repeat Booking Rate',
+    description: '22 of 54 students booked more than once',
+  },
+  {
+    id: 'cancellations',
+    icon: <XCircle className="w-6 h-6" />,
+    value: 0,
+    suffix: '',
+    label: 'Cancellations / Refunds',
+    description: 'Zero cancellations or refund requests',
+  },
+  {
+    id: 'channel',
+    icon: <MessageCircle className="w-6 h-6" />,
+    value: null,
+    label: 'Acquisition Channel',
+    description: 'Friend Referral & WhatsApp Group',
+  },
+]
+
+const BOOKINGS_BY_SUBJECT = [
+  { subject: 'Math', count: 65 },
+  { subject: 'Physics', count: 65 },
+  { subject: 'CS', count: 30 },
+]
+
+function BookingBar({ subject, count, max }) {
+  const pct = Math.round((count / max) * 100)
+  return (
+    <div className="flex items-center gap-3">
+      <span className="w-14 text-xs font-semibold text-gray-500 uppercase tracking-wide shrink-0">
+        {subject}
+      </span>
+      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,71,171,0.1)' }}>
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: 'linear-gradient(90deg, #0047AB, #1a6fd4)' }}
+          initial={{ width: 0 }}
+          whileInView={{ width: `${pct}%` }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+        />
+      </div>
+      <span className="w-8 text-right text-sm font-bold shrink-0" style={{ color: '#003380' }}>
+        {count}
+      </span>
+    </div>
+  )
 }
 
 /* ─── University card ─────────────────────────── */
@@ -50,7 +108,7 @@ function UniversityCard({ uni }) {
         style={{ background: `linear-gradient(135deg, ${uni.color}, ${uni.color}dd)` }}
       >
         <div className="absolute inset-0 opacity-15"
-             style={{ backgroundImage: 'radial-gradient(circle at 30% 20%, white 1px, transparent 1px), radial-gradient(circle at 70% 80%, white 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+          style={{ backgroundImage: 'radial-gradient(circle at 30% 20%, white 1px, transparent 1px), radial-gradient(circle at 70% 80%, white 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/10" />
         <div className="absolute -left-8 -bottom-8 w-32 h-32 rounded-full" style={{ background: `${uni.accentColor}25` }} />
 
@@ -120,9 +178,9 @@ function FounderHero({ founder }) {
       className="rounded-3xl overflow-hidden bg-white shadow-lg border border-gray-100 transition-shadow hover:shadow-2xl"
     >
       <div className="relative h-56 sm:h-64 overflow-hidden flex items-center justify-center"
-           style={{ background: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientTo})` }}>
+        style={{ background: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientTo})` }}>
         <div className="absolute inset-0 opacity-15"
-             style={{ backgroundImage: 'radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 80% 70%, white 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+          style={{ backgroundImage: 'radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 80% 70%, white 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         <Avatar
           photo={founder.photo}
           initials={founder.initials}
@@ -152,9 +210,6 @@ function FounderHero({ founder }) {
           <a href={founder.linkedin} className="text-gray-400 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-blue-50">
             <Linkedin className="w-4 h-4" />
           </a>
-          <a href={founder.twitter} className="text-gray-400 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-blue-50">
-            <Twitter className="w-4 h-4" />
-          </a>
           <Link to="/team" className="ml-auto text-xs font-semibold text-primary flex items-center gap-1 hover:gap-2 transition-all">
             Read more <ArrowRight className="w-3 h-3" />
           </Link>
@@ -169,8 +224,8 @@ export default function Home() {
   const { courses, universities, instructors, loading } = useCatalog()
   const heroRef = useRef(null)
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
-  const heroY     = useTransform(scrollYProgress, [0, 1], [0, 200])
-  const heroFade  = useTransform(scrollYProgress, [0, 1], [1, 0])
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 200])
+  const heroFade = useTransform(scrollYProgress, [0, 1], [1, 0])
 
   return (
     <div className="relative">
@@ -198,21 +253,21 @@ export default function Home() {
 
           <motion.div style={{ y: heroY, opacity: heroFade }} className="absolute inset-0 pointer-events-none select-none">
             <div className="animate-float absolute top-20 right-4 sm:right-16 w-40 sm:w-64 h-40 sm:h-64 rounded-full opacity-10"
-                 style={{ background: 'radial-gradient(circle, #ffffff, transparent)' }} />
+              style={{ background: 'radial-gradient(circle, #ffffff, transparent)' }} />
             <div className="animate-float-rev absolute bottom-32 left-4 sm:left-10 w-32 sm:w-48 h-32 sm:h-48 rounded-full opacity-10"
-                 style={{ background: 'radial-gradient(circle, #f0a500, transparent)' }} />
+              style={{ background: 'radial-gradient(circle, #f0a500, transparent)' }} />
             <div className="animate-float-slow absolute top-1/2 left-1/3 w-60 sm:w-96 h-60 sm:h-96 rounded-full opacity-5"
-                 style={{ background: 'radial-gradient(circle, #ffffff, transparent)' }} />
+              style={{ background: 'radial-gradient(circle, #ffffff, transparent)' }} />
             <div className="absolute inset-0 opacity-5"
-                 style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+              style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
           </motion.div>
 
           <div className="relative w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-24 sm:py-28 md:py-32">
             <div className="max-w-4xl mx-auto text-center">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }}
-                          className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6 sm:mb-8">
+                className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6 sm:mb-8">
                 <Zap className="w-3.5 h-3.5 text-yellow-300" />
-                <span className="text-white/90 text-xs sm:text-sm font-medium">High-Intensity University Revisions · Lifetime Access</span>
+                <span className="text-white/90 text-xs sm:text-sm font-medium">High-Intensity University Revisions</span>
               </motion.div>
 
               <motion.h1
@@ -227,39 +282,21 @@ export default function Home() {
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.6 }}
-                        className="text-white/75 max-w-2xl mx-auto mb-8 sm:mb-10 md:mb-12 leading-relaxed"
-                        style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.25rem)' }}>
+                className="text-white/75 max-w-2xl mx-auto mb-8 sm:mb-10 md:mb-12 leading-relaxed"
+                style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.25rem)' }}>
                 Focused, high-intensity revision packages for <strong className="text-white">University of Hertfordshire</strong> modules —
                 designed to help you pass and achieve the highest marks.
               </motion.p>
 
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6 }}
-                          className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-2 sm:px-0">
+                className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-2 sm:px-0">
                 <Link to="/store" className="btn-accent text-base px-7 py-3.5 w-full sm:w-auto justify-center">
                   <ShoppingCart className="w-4 h-4" /> Browse Modules
                 </Link>
                 <WhatsAppTutorButton size="lg" message="Hi Nexus 101! I'm interested in your revision modules." variant="outline" />
               </motion.div>
 
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75, duration: 0.6 }}
-                          className="mt-10 sm:mt-14 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-white/60 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    {['MN', 'AH', 'SM', 'KT'].map((i, idx) => (
-                      <div key={idx} className="w-7 h-7 rounded-full border-2 border-white/30 flex items-center justify-center text-xs font-semibold text-white"
-                           style={{ background: `hsl(${220 + idx * 30}, 70%, 45%)` }}>
-                        {i}
-                      </div>
-                    ))}
-                  </div>
-                  <span>2,000+ students helped</span>
-                </div>
-                <span className="hidden sm:block opacity-40">|</span>
-                <div className="flex items-center gap-1.5">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
-                  <span>4.9/5 average rating</span>
-                </div>
-              </motion.div>
+
             </div>
           </div>
 
@@ -271,26 +308,29 @@ export default function Home() {
         </section>
 
         {/* ────── STATS BENTO ────── */}
-        <section className="py-20 bg-white relative">
+        <section className="py-20 bg-white relative" aria-label="Season 1 Impact Statistics">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Section>
               <motion.div variants={fadeUp} className="text-center mb-12">
-                <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Our Impact</p>
+                <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
+                  <BookOpen className="w-4 h-4" /> Season 1 · Our Impact
+                </p>
                 <h2 className="text-4xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Numbers that <span className="gradient-text">speak for themselves</span>
                 </h2>
                 <p className="text-gray-500 text-lg max-w-xl mx-auto">
-                  Every statistic here represents a real student who chose to invest in their grades.
+                  Every statistic here is from our first season — real students, real sessions, real results.
                 </p>
               </motion.div>
 
+              {/* ── Row 1: 4 primary stat cards ── */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
                 {STATS.map((stat, i) => (
                   <motion.div key={stat.id} variants={fadeUp}
                     className={`card-hover rounded-2xl p-6 relative overflow-hidden ${i === 0 ? 'sm:col-span-2 lg:col-span-2' : ''}`}
                     style={{
                       background: i === 0 ? 'linear-gradient(135deg, #0047AB, #1a6fd4)'
-                               : i === 2 ? 'linear-gradient(135deg, #0a1628, #003380)' : '#f8faff',
+                        : i === 2 ? 'linear-gradient(135deg, #0a1628, #003380)' : '#f8faff',
                       border: i === 1 || i === 3 ? '1px solid #e2ecf9' : 'none',
                     }}
                   >
@@ -298,9 +338,8 @@ export default function Home() {
                       <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10" style={{ background: 'white' }} />
                     )}
                     <div className="relative z-10">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                        i === 0 || i === 2 ? 'text-white bg-white/15' : 'text-primary bg-primary/10'
-                      }`}>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${i === 0 || i === 2 ? 'text-white bg-white/15' : 'text-primary bg-primary/10'
+                        }`}>
                         {STAT_ICONS[stat.id]}
                       </div>
                       <div className={`text-5xl font-bold mb-1 ${i === 0 || i === 2 ? 'text-white' : 'text-primary-dark'}`}>
@@ -317,12 +356,64 @@ export default function Home() {
                 ))}
               </div>
 
+              {/* ── Row 2: supplementary Season 1 cards ── */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
+                {SEASON1_EXTRA.map((stat) => (
+                  <motion.div key={stat.id} variants={fadeUp}
+                    className="card-hover rounded-2xl p-6 relative overflow-hidden"
+                    style={{ background: '#f8faff', border: '1px solid #e2ecf9' }}
+                  >
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-primary bg-primary/10">
+                      {stat.icon}
+                    </div>
+                    {stat.value !== null ? (
+                      <div className="text-5xl font-bold mb-1 text-primary-dark">
+                        <AnimatedCounter value={stat.value} suffix={stat.suffix} duration={1800} />
+                      </div>
+                    ) : (
+                      <div className="text-xl font-bold mb-1 leading-snug text-primary-dark">
+                        {stat.description}
+                      </div>
+                    )}
+                    <div className="text-lg font-semibold mb-1 text-gray-800">{stat.label}</div>
+                    {stat.value !== null && (
+                      <div className="text-sm text-gray-400">{stat.description}</div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* ── Bookings by Subject bar chart ── */}
+              <motion.div variants={fadeUp} className="rounded-2xl p-6 sm:p-8 mb-5"
+                style={{ background: '#f8faff', border: '1px solid #e2ecf9' }}>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+                  <div>
+                    <p className="font-bold text-gray-900 text-lg" style={{ fontFamily: 'Playfair Display, serif' }}>Bookings by Subject</p>
+                    <p className="text-sm text-gray-400">Total bookings across all subjects — Season 1</p>
+                  </div>
+                  <span className="text-3xl font-bold text-primary">
+                    <AnimatedCounter
+                      value={BOOKINGS_BY_SUBJECT.reduce((s, b) => s + b.count, 0)}
+                      suffix=" bookings"
+                      duration={1800}
+                    />
+                  </span>
+                </div>
+                <div className="space-y-4">
+                  {BOOKINGS_BY_SUBJECT.map(b => (
+                    <BookingBar key={b.subject} subject={b.subject} count={b.count}
+                      max={Math.max(...BOOKINGS_BY_SUBJECT.map(x => x.count))} />
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* ── Feature strip ── */}
               <motion.div variants={fadeUp} className="rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-3 gap-6"
-                          style={{ background: '#f8faff', border: '1px solid #e2ecf9' }}>
+                style={{ background: '#f8faff', border: '1px solid #e2ecf9' }}>
                 {[
-                  { icon: <Target className="w-6 h-6 text-primary" />, title: 'Targeted Revisions',  desc: 'Every module is built around your university\'s actual syllabus.' },
-                  { icon: <Zap className="w-6 h-6 text-primary" />,    title: 'High-Intensity',     desc: 'Tight, focused content — no fluff, no filler, only what\'s on the exam.' },
-                  { icon: <Trophy className="w-6 h-6 text-primary" />, title: 'Built to Pass',      desc: 'Designed by tutors who know what high-mark answers look like.' },
+                  { icon: <Target className="w-6 h-6 text-primary" />, title: 'Targeted Revisions', desc: 'Every module is built around your university\'s actual syllabus.' },
+                  { icon: <Zap className="w-6 h-6 text-primary" />, title: 'High-Intensity', desc: 'Tight, focused content — no fluff, no filler, only what\'s on the exam.' },
+                  { icon: <Trophy className="w-6 h-6 text-primary" />, title: 'Built to Pass', desc: 'Designed by tutors who know what high-mark answers look like.' },
                 ].map(item => (
                   <div key={item.title} className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-white shadow-sm">{item.icon}</div>
@@ -358,16 +449,16 @@ export default function Home() {
                 <div className="w-full max-w-sm">
                   {loading
                     ? (
-                        <div className="rounded-3xl overflow-hidden bg-white shadow-md border border-gray-100 animate-pulse">
-                          <div className="h-48 bg-gray-200" />
-                          <div className="p-6 space-y-3">
-                            <div className="h-5 bg-gray-200 rounded w-3/4" />
-                            <div className="h-3 bg-gray-100 rounded w-1/2" />
-                            <div className="h-3 bg-gray-100 rounded w-full" />
-                            <div className="h-3 bg-gray-100 rounded w-5/6" />
-                          </div>
+                      <div className="rounded-3xl overflow-hidden bg-white shadow-md border border-gray-100 animate-pulse">
+                        <div className="h-48 bg-gray-200" />
+                        <div className="p-6 space-y-3">
+                          <div className="h-5 bg-gray-200 rounded w-3/4" />
+                          <div className="h-3 bg-gray-100 rounded w-1/2" />
+                          <div className="h-3 bg-gray-100 rounded w-full" />
+                          <div className="h-3 bg-gray-100 rounded w-5/6" />
                         </div>
-                      )
+                      </div>
+                    )
                     : universities.map((uni) => <UniversityCard key={uni.id} uni={uni} />)
                   }
                 </div>
@@ -388,20 +479,20 @@ export default function Home() {
                   Learn from <span className="gradient-text">expert tutors</span>
                 </h2>
                 <p className="text-gray-500 text-lg max-w-xl mx-auto">
-                  Five specialists. Each obsessed with one thing: getting you a passing grade.
+                  Ten specialists. Each obsessed with one thing: getting you a passing grade.
                 </p>
               </motion.div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 {loading
                   ? [...Array(5)].map((_, i) => (
-                      <div key={i} className="rounded-2xl bg-white shadow-md border border-gray-100 p-5 flex flex-col items-center animate-pulse">
-                        <div className="w-20 h-20 rounded-full bg-gray-200 mb-3" />
-                        <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
-                        <div className="h-3 bg-gray-100 rounded w-16 mb-1" />
-                        <div className="h-3 bg-gray-100 rounded w-20" />
-                      </div>
-                    ))
+                    <div key={i} className="rounded-2xl bg-white shadow-md border border-gray-100 p-5 flex flex-col items-center animate-pulse">
+                      <div className="w-20 h-20 rounded-full bg-gray-200 mb-3" />
+                      <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
+                      <div className="h-3 bg-gray-100 rounded w-16 mb-1" />
+                      <div className="h-3 bg-gray-100 rounded w-20" />
+                    </div>
+                  ))
                   : instructors.map(ins => <InstructorMiniCard key={ins.id} ins={ins} />)
                 }
               </div>
@@ -445,7 +536,7 @@ export default function Home() {
             <Section className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
               <motion.div variants={fadeUp} className="relative">
                 <div className="rounded-3xl overflow-hidden aspect-square flex items-center justify-center relative"
-                     style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}>
+                  style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}>
                   <div className="glass rounded-2xl p-8 text-center">
                     <div className="text-7xl mb-4 select-none">🎯</div>
                     <p className="text-white font-bold text-xl mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>Nexus 101</p>
@@ -453,8 +544,8 @@ export default function Home() {
                     <div className="mt-6 grid grid-cols-2 gap-3">
                       {[
                         { label: 'Founded', value: '2023' },
-                        { label: 'Founders', value: '2' },
-                        { label: 'Universities', value: '1' },
+                        { label: 'Founders', value: '1' },
+                        { label: 'University', value: '1' },
                         { label: 'Rating', value: '4.9 ★' },
                       ].map(item => (
                         <div key={item.label} className="glass rounded-xl p-3 text-center">
@@ -465,14 +556,9 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="absolute -top-4 -right-4 glass-light rounded-2xl px-4 py-2.5 shadow-xl"
-                       style={{ border: '1px solid rgba(0,71,171,0.1)' }}>
-                    <p className="text-primary font-bold text-lg">98%</p>
+                    style={{ border: '1px solid rgba(0,71,171,0.1)' }}>
+                    <p className="text-primary font-bold text-lg">80%</p>
                     <p className="text-gray-500 text-xs">Pass Rate</p>
-                  </div>
-                  <div className="absolute -bottom-4 -left-4 glass-light rounded-2xl px-4 py-2.5 shadow-xl"
-                       style={{ border: '1px solid rgba(0,71,171,0.1)' }}>
-                    <p className="text-primary font-bold text-lg">2000+</p>
-                    <p className="text-gray-500 text-xs">Students</p>
                   </div>
                 </div>
               </motion.div>
@@ -482,7 +568,7 @@ export default function Home() {
                   Why Nexus 101
                 </motion.p>
                 <motion.h2 variants={fadeUp} className="text-4xl font-bold text-gray-900 mb-6 leading-tight"
-                           style={{ fontFamily: 'Playfair Display, serif' }}>
+                  style={{ fontFamily: 'Playfair Display, serif' }}>
                   We exist to help you <span className="gradient-text">pass and excel.</span>
                 </motion.h2>
                 <motion.p variants={fadeUp} className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -499,7 +585,6 @@ export default function Home() {
                     'High-intensity, exam-targeted revisions',
                     'Aligned to the UH syllabus — every module, every topic',
                     'WhatsApp tutoring with real instructors',
-                    'Lifetime access — pay once, watch forever',
                   ].map(point => (
                     <motion.li key={point} variants={fadeUp} className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
@@ -527,12 +612,12 @@ export default function Home() {
                 <Sparkles className="w-3 h-3 inline mr-1" /> Ready to start?
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-4xl sm:text-5xl font-bold text-white mb-6"
-                         style={{ fontFamily: 'Playfair Display, serif' }}>
-                Join 2,000+ students<br />
+                style={{ fontFamily: 'Playfair Display, serif' }}>
+                Join the students<br />
                 <span style={{ color: '#f0a500' }}>passing their modules.</span>
               </motion.h2>
               <motion.p variants={fadeUp} className="text-white/70 text-lg mb-10 max-w-xl mx-auto">
-                One-time payment. Lifetime access. 7-day money-back guarantee.
+                One-time payment.
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/store" className="btn-accent text-base px-8 py-4">

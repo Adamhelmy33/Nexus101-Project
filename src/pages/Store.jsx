@@ -2,8 +2,8 @@ import { useState, useRef, useMemo, useEffect, useCallback } from 'react'
 import { Link, useSearchParams, useParams, Navigate } from 'react-router-dom'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import {
-  Users, Clock, CheckCircle2, Star, Search, ArrowRight, ArrowLeft,
-  BookOpen, Sparkles, GraduationCap,
+  CheckCircle2, Search, ArrowRight, ArrowLeft,
+  BookOpen, GraduationCap,
   Layers, X, ChevronRight, Package, Tag, ShoppingCart, EyeOff,
 } from 'lucide-react'
 
@@ -189,14 +189,7 @@ function ModuleCard({ course, university }) {
       </div>
 
       <div className="p-6 flex-1 flex flex-col">
-        <p className="text-gray-500 text-sm mb-4 leading-relaxed">{course.description}</p>
-
-        <div className="flex items-center gap-3 mb-4 text-xs text-gray-400 flex-wrap">
-          <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {(course.students ?? 0).toLocaleString()}</span>
-          <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {course.hours}h</span>
-          <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> {course.modules}</span>
-          <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" /> 4.9</span>
-        </div>
+        <p className="text-gray-500 text-sm mb-5 leading-relaxed">{course.description}</p>
 
         {course.topics && course.topics.length > 0 && (
           <ul className="space-y-1.5 mb-5 flex-1">
@@ -420,6 +413,7 @@ export default function Store() {
           `)
           .eq('subject', subjectParam)
           .eq('study_level', trackParam)
+          .eq('published', true)
 
         if (isMounted) {
           if (error) {
@@ -484,11 +478,7 @@ export default function Store() {
           {level === 'subjects' ? (
             /* Top-level: fixed store hero */
             <>
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full mb-4">
-                <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                <span className="text-white/90 text-xs font-medium">Lifetime access · 7-day money-back guarantee</span>
-              </motion.div>
+
               <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4"
                 style={{ fontFamily: 'Playfair Display, serif' }}>

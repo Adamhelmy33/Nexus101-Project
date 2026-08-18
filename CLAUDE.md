@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -12,76 +12,192 @@ npm run preview    # Preview production build locally
 
 No test runner is configured. There is no lint script; Vite handles it at build time.
 
-Deploy to Netlify: `netlify.toml` is configured. The build command includes `--legacy-peer-deps` due to peer-dep conflicts in the dependency tree.
+## Deployment
+
+The project has **two live deployments** that must stay in sync:
+
+| Remote | Repo | Hosting | Notes |
+|--------|------|---------|-------|
+| `origin` | `Nagdy11/Nexus101-Project` | **Netlify** (primary) | May be ISP-blocked in some countries |
+| `vercel` | `Adamhelmy33/Nexus101-Project` | **Vercel** (backup) | Fork; same codebase |
+
+**Always push to both remotes on every commit** so they stay in sync:
+
+```bash
+git push origin main
+git push vercel main
+```
+
+`netlify.toml` configures the Netlify build. The build command uses `--legacy-peer-deps` due to peer-dep conflicts in the dependency tree. `vercel.json` configures SPA fallback for Vercel.
 
 ## Architecture Overview
 
-**Nexus 101** is a React 18 + Vite SPA — an EdTech platform for Egyptian university students. It covers course sales, video streaming (Bunny.net HLS), a points-based wallet, AI tutoring (Claude), and admin analytics.
+**Nexus 101** is a React 18 + Vite SPA — an EdTech platform for Egyptian university students (currently University of Hertfordshire / UH only). It presents a course catalog, directs all purchases to an external Google Form, and provides an AI Study Buddy tutor. There is **no in-site checkout, no payment processing, no video streaming, and no wallet/points system**.
 
 ### Provider tree
 
 ```
-BrowserRouter → AuthProvider → WalletProvider → <App />
+BrowserRouter → AuthProvider → <App />
 ```
 
-`App.jsx` handles page transitions (Framer Motion) and hides the navbar/footer on fullscreen routes (admin, login, video player).
+`App.jsx` handles page transitions (Framer Motion) and hides the navbar/footer on admin and login routes.
 
 ### State management
 
 All state is React Context — no Redux or Zustand.
 
-- **AuthContext** (`src/contexts/AuthContext.jsx`) — current user, login/logout/register, `isAdmin` flag, 30s heartbeat ping
-- **WalletContext** (`src/contexts/WalletContext.jsx`) — points balance, ledger, tier, free-course progress, cross-tab sync via `storage` events
+- **AuthContext** (`src/contexts/AuthContext.jsx`) — current user, login/logout/register, `isAdmin` flag, 30-second heartbeat ping
 
 ### Data persistence
 
-Auth and wallet are **localStorage-based** (client-side only), deliberately designed so the auth/wallet layer can be swapped to Supabase or Firebase without touching any UI components. The wallet uses an **append-only ledger** — balance is always re-derived from ledger rows, never stored as a mutable field.
+Auth state is **Supabase-backed** via `src/lib/supabase.js`. The `profiles` table stores extended user info populated by the `handle_new_user()` Postgres trigger on signup.
 
-### Pricing — single source of truth
+## Course Hierarchy (Supabase schema)
 
-**`nexus.config.js`** is the canonical source for all pricing logic: per-course price overrides, per-university defaults, global fallback, loyalty tier thresholds, "Buy 3 Get 1 Free" bundle multiplier, shelf bundle definitions, and Study Buddy daily limits. **Never hardcode prices or tier thresholds in components** — always pull from this config or from the helpers in `src/lib/pricing.js`.
+```
+University (UH only)
+  └── Subject  (engineering / physiotherapy / pharmacy)
+        └── Track  (ifp / level-4)
+              └── Course  (one module, e.g. "Cardiology")
+                    └── course_items  (Test 1 / Test 2 / Final — varies per course)
+                          └── course_item_parts  (3 standard parts each — mostly unused placeholders; video hosting was removed)
+```
 
-### Lib layer
+### Key table fields
+
+| Table | Important columns |
+|-------|-------------------|
+| `subject_visibility` | `subject`, `track`, `is_visible`, `whatsapp_group_url` |
+| `courses` | `published`, `buy_form_url`, `bundle_price_egp`, `free_revision_youtube_url` |
+| `course_items` | `published`, `price_egp` |
+| `bundles` | Cross-module bundles (e.g. "Cardio + Neuro") |
+| `bundle_components` | Join table linking `bundles` → `courses` |
+| `instructors` | Real instructor profiles |
+| `course_instructors` | Join table linking instructors to courses |
+
+### Pricing
+
+- **Per-item price**: `course_items.price_egp`
+- **Module bundle**: `courses.bundle_price_egp` — buying all items in a course together
+- **Cross-module bundles**: `bundles` + `bundle_components` tables — combos spanning multiple courses within the same subject/track (e.g. "Cardio + Neuro")
+
+Prices are **read from Supabase**, not from `nexus.config.js` (that file is now largely vestigial and can be ignored for pricing).
+
+## Purchasing Flow
+
+**All purchasing is 100% external.** Every "Buy" button links to `courses.buy_form_url`, which is a Google Form URL. Google Forms are grouped by the 5 subject/track combinations. No payment processing happens in the app.
+
+## Visibility Controls
+
+Visibility is controlled directly via the **Supabase Table Editor** — no code changes needed:
+
+- `subject_visibility.is_visible` — toggle an entire subject/track on/off
+- `courses.published` — show/hide a specific module
+- `course_items.published` — show/hide a specific test/item
+
+## Per-Subject Features
+
+Each subject/track has two special features configured in Supabase:
+
+1. **WhatsApp group popup** — `subject_visibility.whatsapp_group_url` — shown on every page visit for that subject/track (component: `WhatsAppGroupPopup.jsx`)
+2. **Free revision video** — `courses.free_revision_youtube_url` — one free YouTube revision video slot per module, shown on the course detail page
+
+## Routing & Pages
+
+Routes are declared in `App.jsx`. `ProtectedRoute` wraps admin routes using `useAuth()`.
+
+| Route | Page | Notes |
+|-------|------|-------|
+| `/` | `Home.jsx` | Landing page |
+| `/store` | `Store.jsx` | Course catalog with subject/track filters |
+| `/course/:id` | `CourseDetail.jsx` | Module detail, items, pricing, buy links |
+| `/team` | `Team.jsx` | Team/instructor profiles |
+| `/contact` | `Contact.jsx` | Contact form |
+| `/login` | `Login.jsx` | Auth (Supabase) |
+| `/admin-nexus` | `Admin.jsx` | Admin dashboard — students grouped by major |
+
+## Signup & Profiles
+
+Registration collects and stores these fields on the `profiles` table (populated by the `handle_new_user()` Supabase trigger):
+
+- `name`
+- `email` — must be `@gmail.com`
+- `whatsapp_number`
+- `is_returning_student`
+- `referral_source`
+- `high_school_system`
+- `major_subject`
+- `major_study_level`
+
+## Admin Dashboard (`/admin-nexus`)
+
+- Lists all registered students grouped by their `major_subject`
+- Shows all signup profile fields per student
+- Only accessible to users with `isAdmin === true`
+
+## Lib Layer
 
 | File | Responsibility |
-|---|---|
-| `src/lib/pricing.js` | `pointsCostFor()`, `recommendedBundleFor()`, currency conversion |
-| `src/lib/wallet.js` | Ledger read/write, `getWalletState()`, `creditWallet()`, `redeemCourse()` |
-| `src/lib/auth.js` | localStorage auth, `initAuthDB()` seed, `pingActiveViewer()` |
+|------|----------------|
+| `src/lib/supabase.js` | Supabase client initialisation |
+| `src/lib/auth.js` | Auth helpers, `pingActiveViewer()` |
 | `src/lib/studyBuddy.js` | Claude API call (with mock fallback if no API key) |
-| `src/lib/bunny.js` | HMAC-signed HLS URLs from backend, demo HLS fallback |
-| `src/lib/customCourse.js` | AI syllabus parsing, segment matching, playlist builder |
 
-### API (Netlify/Vercel serverless)
+### Hooks
 
-- `api/paymob.js` — server-side Paymob payment key creation (secrets never reach client)
-- `api/study-buddy.js` — Claude 3.5 Sonnet with curriculum-aware prompt; graceful fallback if `ANTHROPIC_API_KEY` is absent
+| File | Responsibility |
+|------|----------------|
+| `src/hooks/useCatalog.js` | Fetches and shapes the full course catalog from Supabase (subjects → tracks → courses → items → bundles) |
 
-### Data constants
+## Key Components
 
-`src/data/constants.js` defines the 4 universities, 12+ courses, founders, team, and seed demo accounts. `src/data/topics.js` provides course-aware context injected into Study Buddy prompts. `src/data/segments.js` holds video segment metadata.
+| Component | Purpose |
+|-----------|---------|
+| `WhatsAppGroupPopup.jsx` | Per-subject WhatsApp group prompt, shown on every visit |
+| `WhatsAppButton.jsx` | Floating WhatsApp support button |
+| `WhatsAppTutorButton.jsx` | Floating Study Buddy / AI tutor button |
+| `ParallaxBackground.jsx` | Decorative parallax effect on Home |
+| `AnimatedCounter.jsx` | Animated stats counter |
 
-### Routing & protection
+## Study Buddy (AI tutor)
 
-Routes are declared in `App.jsx`. `ProtectedRoute` wraps auth-gated and admin-only routes using `useAuth()`. Admin routes require `isAdmin === true`.
+`src/lib/studyBuddy.js` calls the Claude API with a curriculum-aware prompt. Falls back gracefully to a mock response if `ANTHROPIC_API_KEY` is absent.
 
-### Styling
+## Styling
 
-Tailwind CSS v4 (configured via `@theme` directive in `src/index.css`, not a separate `tailwind.config.*` file). Framer Motion is the primary animation library — page transitions and widget interactions both use it.
+Tailwind CSS v4 (configured via `@theme` directive in `src/index.css`, no separate `tailwind.config.*` file). Framer Motion handles page transitions and micro-animations.
 
-### Video streaming
-
-`src/components/video/BunnyVideoPlayer.jsx` uses HLS.js to play Bunny.net streams. Signed URLs are fetched from `api/bunny.js` (or a demo fallback) and refreshed on a configurable interval defined in `nexus.config.js`. `SocialDRMOverlay` deters screen-recording.
-
-## Environment variables
+## Environment Variables
 
 Copy `.env.example` → `.env` and fill in:
-- `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
-- `VITE_PAYMOB_*` keys
-- `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`
-- `BUNNY_*` credentials
-- `VITE_WHATSAPP_NUMBER`, `VITE_SUPPORT_EMAIL`
 
-## Git workflow
+```
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+ANTHROPIC_API_KEY          # for Study Buddy; optional — falls back to mock
+VITE_WHATSAPP_NUMBER
+VITE_SUPPORT_EMAIL
+```
+
+The following are **no longer needed** and should not be added:
+- `VITE_PAYMOB_*` — payment processing removed
+- `BUNNY_*` — video streaming removed
+
+## Removed Systems (do not re-add)
+
+The following were intentionally removed from the codebase:
+
+| System | What was removed |
+|--------|-----------------|
+| **Wallet / points** | `WalletContext`, `WalletProvider`, `src/lib/wallet.js`, wallet UI components |
+| **Video streaming** | Bunny.net integration, `BunnyVideoPlayer`, `src/lib/bunny.js`, `CourseViewer.jsx` |
+| **Paymob payments** | `api/paymob.js`, `Checkout.jsx`, all client payment flow |
+| **Student dashboard** | Student-facing `Dashboard.jsx`, `MyCourses.jsx` |
+| **Custom Course Builder** | `SyllabusUploader`, `PlaylistBuilder`, `CustomCoursePlayer`, `src/lib/customCourse.js` |
+| **Legacy lib files** | `src/lib/progress.js`, `src/lib/pricing.js`, `src/lib/courseCache.js` |
+
+## Git Workflow
+
 - Always commit and push directly to `main`
-- Do NOT create pull requests or feature branches
+- Do **NOT** create pull requests or feature branches
+- Push to **both** remotes (`origin` → Netlify, `vercel` → Vercel) on every commit

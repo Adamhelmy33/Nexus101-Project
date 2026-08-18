@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Mail, Phone, MapPin, MessageCircle, Send, AlertCircle,
+  Mail, MapPin, MessageCircle, Send, AlertCircle,
   CheckCircle2, ChevronDown, Clock, Sparkles,
 } from 'lucide-react'
 import { WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../data/constants'
@@ -9,7 +9,7 @@ import { WHATSAPP_NUMBER, SUPPORT_EMAIL } from '../data/constants'
 const FAQS = [
   {
     q: 'What exactly do I get when I buy a revision module?',
-    a: 'Lifetime access to a full set of HD video revisions, downloadable PDF revision sheets, past-paper walkthroughs, and direct WhatsApp tutoring support — all focused on the specific module you bought.',
+    a: 'A full set of HD video revisions, downloadable PDF revision sheets, past-paper walkthroughs, and direct WhatsApp tutoring support — all focused on the specific module you bought.',
   },
   {
     q: 'Are these meant to replace my university lectures?',
@@ -19,10 +19,7 @@ const FAQS = [
     q: 'How does WhatsApp tutoring work?',
     a: 'Anywhere inside the platform you can tap "WhatsApp Tutoring" to message a real tutor. Send a screenshot, ask about a step, or get a quick concept clarified — usually within an hour.',
   },
-  {
-    q: 'Can I get a refund if I don\'t like the module?',
-    a: 'Yes, we offer a 7-day money-back guarantee on all revision modules.',
-  },
+
   {
     q: 'Which universities do you cover?',
     a: 'Currently University of Hertfordshire — with more universities on the way. Drop us a message if your university isn\'t listed yet.',
@@ -81,7 +78,7 @@ export default function Contact() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 
         {/* ── Quick channels ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
           <ContactCard
             icon={MessageCircle}
             title="WhatsApp"
@@ -95,13 +92,6 @@ export default function Contact() {
             subtitle={SUPPORT_EMAIL}
             href={`mailto:${SUPPORT_EMAIL}`}
             color="#0047AB"
-          />
-          <ContactCard
-            icon={Phone}
-            title="Call"
-            subtitle={`+${WHATSAPP_NUMBER}`}
-            href={`tel:+${WHATSAPP_NUMBER}`}
-            color="#f0a500"
           />
         </div>
 

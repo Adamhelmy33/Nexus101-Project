@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   Linkedin, Twitter, BookOpen, ArrowRight, Star, Award,
-  GraduationCap, Palette, Users, Code2,
+  GraduationCap, Palette, Users, Code2, Share2,
 } from 'lucide-react'
 import Avatar from '../components/Avatar'
 import { FOUNDERS, TEAM } from '../data/constants'
@@ -104,7 +104,10 @@ function FounderCard({ founder }) {
 
 /* ─── Team / designer card ────────────────────── */
 function TeamMemberCard({ member }) {
-  const RoleIcon = member.role.toLowerCase().includes('developer') ? Code2 : Palette
+  const roleLower = member.role.toLowerCase()
+  const RoleIcon = roleLower.includes('developer') ? Code2
+    : roleLower.includes('social') || roleLower.includes('media') ? Share2
+      : Palette
   return (
     <motion.div
       variants={fadeUp}
@@ -226,7 +229,7 @@ export default function Team() {
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
             className="text-white/65 text-base sm:text-lg px-2 sm:px-0">
-            One founder, Eleven instructors, one mission — your university success.
+            One founder, Ten instructors, one mission — your university success.
           </motion.p>
         </div>
         <svg className="absolute bottom-0 left-0 right-0" viewBox="0 0 1440 50" fill="none">
@@ -262,7 +265,7 @@ export default function Team() {
               <Users className="w-4 h-4" /> Instructors
             </p>
             <h2 className="text-3xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Eleven experts. One goal.
+              Ten experts. One goal.
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               Each instructor specialises in a slice of the curriculum — and they all want one thing: high marks for you.
@@ -303,7 +306,7 @@ export default function Team() {
           </motion.div>
 
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {TEAM.map(member => <TeamMemberCard key={member.id} member={member} />)}
           </motion.div>
         </section>
