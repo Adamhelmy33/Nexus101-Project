@@ -259,35 +259,4 @@ export async function getAllUsers() {
   }))
 }
 
-/* ── Admin metrics (computed from live Supabase data) ── */
-export async function getAdminMetrics(courses) {
-  const users = await getAllUsers()
-  const allPurchases = users.flatMap(u =>
-    (u.purchases || []).map(p => ({ ...p, email: u.email, name: u.name }))
-  )
 
-  // Revenue = amount (EGP paid directly via Paymob or demo flow)
-  const revenueOf = p => (p.amount || 0)
-  const totalRevenue   = allPurchases.reduce((sum, p) => sum + revenueOf(p), 0)
-  const subscriberCount = users.filter(u => !u.isAdmin && u.purchases.length > 0).length
-  const activeViewers   = getActiveViewers().length
-
-  const perCourse = (courses || []).map(c => {
-    const sales = allPurchases.filter(p => p.courseId === c.id)
-    return {
-      ...c,
-      sales: sales.length,
-      revenue: sales.reduce((s, p) => s + revenueOf(p), 0),
-    }
-  })
-
-  return {
-    totalRevenue,
-    subscriberCount,
-    activeViewers,
-    perCourse,
-    totalUsers: users.filter(u => !u.isAdmin).length,
-    users,
-    purchases: allPurchases,
-  }
-}

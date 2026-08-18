@@ -1,19 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  DollarSign, Users, Activity, BookOpen, Search, Download,
-  TrendingUp, Calendar, ShoppingCart, Eye, ChevronDown, LogOut,
-  Phone, MessageCircle,
+  Users, Activity, LogOut, MessageCircle,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { getAllUsers, getAdminMetrics, getActiveViewers } from '../lib/auth'
-import { COURSES } from '../data/constants'
+import { getAllUsers, getActiveViewers } from '../lib/auth'
 import Logo from '../components/Logo'
-
-const EMPTY_METRICS = {
-  totalRevenue: 0, subscriberCount: 0, activeViewers: 0,
-  perCourse: [], totalUsers: 0,
-}
 
 const MAJOR_GROUPS = [
   { id: 'eng-ifp', title: 'Engineering — IFP', subject: 'engineering', level: 'ifp' },
@@ -52,12 +44,9 @@ function formatReferral(slug) {
 
 export default function Admin() {
   const { user, logout } = useAuth()
-  const [allUsers, setAllUsers]       = useState([])
-  const [metrics,  setMetrics]        = useState(EMPTY_METRICS)
-  const [activeViewers, setActive]    = useState([])
-  const [loading, setLoading]         = useState(true)
-  const [search, setSearch]           = useState('')
-  const [filterCourse, setFilterCourse] = useState('all')
+  const [allUsers, setAllUsers]    = useState([])
+  const [activeViewers, setActive] = useState([])
+  const [loading, setLoading]      = useState(true)
 
   /* ── Group users by major_subject + major_study_level ── */
   const groupedUsers = MAJOR_GROUPS.map(group => {
@@ -78,10 +67,9 @@ export default function Admin() {
   useEffect(() => {
     let alive = true
     async function fetchAll() {
-      const [users, m] = await Promise.all([getAllUsers(), getAdminMetrics(COURSES)])
+      const users = await getAllUsers()
       if (!alive) return
       setAllUsers(users)
-      setMetrics(m)
       setActive(getActiveViewers())
       setLoading(false)
     }
@@ -89,18 +77,6 @@ export default function Admin() {
     const id = setInterval(fetchAll, 10_000)
     return () => { alive = false; clearInterval(id) }
   }, [])
-
-  const allPurchases = allUsers.flatMap(u =>
-    (u.purchases || []).map(p => ({ ...p, email: u.email, name: u.name }))
-  )
-
-  /* ── Filter user-purchase rows ── */
-  const filteredPurchases = allPurchases.filter(p => {
-    if (filterCourse !== 'all' && p.courseId !== filterCourse) return false
-    if (!search.trim()) return true
-    const q = search.toLowerCase()
-    return p.email.toLowerCase().includes(q) || p.name?.toLowerCase().includes(q)
-  })
 
   return (
     <div className="min-h-screen" style={{ background: '#f8faff' }}>
@@ -140,30 +116,11 @@ export default function Admin() {
           <h1 className="text-3xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
             Owner Dashboard
           </h1>
-          <p className="text-sm text-gray-500">Real-time overview of revenue, students, and active sessions.</p>
+          <p className="text-sm text-gray-500">Real-time overview of registered students and active sessions.</p>
         </motion.div>
 
         {/* ── Stat cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard
-            icon={DollarSign}
-            label="Total Revenue"
-            value={`${metrics.totalRevenue.toLocaleString()} EGP`}
-            sub={`from ${allPurchases.length} sale${allPurchases.length !== 1 ? 's' : ''}`}
-            gradient="linear-gradient(135deg, #0047AB, #1a6fd4)"
-            light={false}
-          />
-          <StatCard
-            icon={Users}
-            label="Subscribers"
-            value={metrics.subscriberCount.toLocaleString()}
-            sub={`${metrics.totalUsers} total accounts`}
-            gradient="#f8faff"
-            border
-            light
-            iconBg="rgba(0,71,171,0.1)"
-            iconColor="#0047AB"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 max-w-2xl gap-4 mb-8">
           <StatCard
             icon={Activity}
             label="Active Viewers"
@@ -173,158 +130,17 @@ export default function Admin() {
             light={false}
           />
           <StatCard
-            icon={BookOpen}
-            label="Modules Live"
-            value={COURSES.length.toString()}
-            sub={`${COURSES.reduce((s, c) => s + c.modules, 0)} total lessons`}
-            gradient="#f8faff"
-            border
-            light
-            iconBg="rgba(240,165,0,0.15)"
-            iconColor="#f0a500"
+            icon={Users}
+            label="Registered Students"
+            value={allUsers.length.toString()}
+            sub="total registered accounts"
+            gradient="linear-gradient(135deg, #0047AB, #1a6fd4)"
+            light={false}
           />
         </div>
 
-        {/* ── Per-course breakdown ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Revenue by module
-            </h2>
-            <span className="flex items-center gap-1 text-xs text-green-600 font-semibold">
-              <TrendingUp className="w-3.5 h-3.5" /> Live
-            </span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {metrics.perCourse.map(c => (
-              <div key={c.id} className="rounded-2xl p-4" style={{ background: '#f8faff', border: '1px solid #e2ecf9' }}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg flex-shrink-0"
-                    style={{ background: `linear-gradient(135deg, ${c.gradientFrom}, ${c.gradientTo})` }}
-                  >
-                    {c.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-gray-900 truncate">{c.title}</p>
-                    <p className="text-xs text-gray-400">{c.sales} sale{c.sales !== 1 ? 's' : ''}</p>
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-primary">
-                  {c.revenue.toLocaleString()} <span className="text-xs text-gray-400 font-medium">EGP</span>
-                </p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ── Purchases table ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
-            <div>
-              <h2 className="font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Student Purchases
-              </h2>
-              <p className="text-xs text-gray-400 mt-0.5">
-                {filteredPurchases.length} of {allPurchases.length} record{allPurchases.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:flex-none">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search students…"
-                  className="pl-9 pr-3 py-2 rounded-xl border border-gray-200 text-sm w-full sm:w-56 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-                />
-              </div>
-
-              <div className="relative">
-                <select
-                  value={filterCourse}
-                  onChange={e => setFilterCourse(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-                >
-                  <option value="all">All courses</option>
-                  {COURSES.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                </select>
-                <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-          </div>
-
-          {filteredPurchases.length === 0 ? (
-            <div className="text-center py-14 text-gray-400">
-              <ShoppingCart className="w-10 h-10 mx-auto mb-3 opacity-40" />
-              <p className="text-sm">No purchases found.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead style={{ background: '#f8faff' }}>
-                  <tr className="text-left text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-3 font-semibold">Student</th>
-                    <th className="px-6 py-3 font-semibold">Course</th>
-                    <th className="px-6 py-3 font-semibold">Method</th>
-                    <th className="px-6 py-3 font-semibold">Date</th>
-                    <th className="px-6 py-3 font-semibold text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPurchases.map((p, i) => {
-                    const course = COURSES.find(c => c.id === p.courseId)
-                    return (
-                      <tr key={i} className="border-t border-gray-100 hover:bg-blue-50/40 transition-colors">
-                        <td className="px-6 py-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                                 style={{ background: 'linear-gradient(135deg, #0047AB, #1a6fd4)' }}>
-                              {(p.name || p.email)[0].toUpperCase()}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-medium text-gray-900 text-sm truncate">{p.name || '—'}</p>
-                              <p className="text-xs text-gray-400 truncate">{p.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-3.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-base">{course?.icon}</span>
-                            <span className="text-gray-700">{course?.title || p.courseId}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-3.5">
-                          <span className="text-xs px-2 py-1 rounded-full font-medium"
-                                style={{ background: p.method === 'wallet' ? '#fef2f2' : '#eff6ff',
-                                         color:      p.method === 'wallet' ? '#b91c1c' : '#1e3a8a' }}>
-                            {p.method === 'wallet' ? 'Vodafone Cash' : 'Card'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3.5 text-gray-500 text-xs">
-                          <span className="flex items-center gap-1.5">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(p.purchasedAt).toLocaleDateString()}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3.5 text-right">
-                          <span className="font-bold text-primary">{(p.pointsSpent || p.amount || 0).toLocaleString()}</span>
-                          <span className="text-xs text-gray-400 ml-1">EGP</span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </motion.div>
-
         {/* ── All users list grouped by major ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                     className="mt-8 space-y-6">
           <div className="flex items-center justify-between">
             <div>
@@ -359,7 +175,6 @@ export default function Admin() {
                         <th className="px-6 py-3 font-semibold whitespace-nowrap">Returning</th>
                         <th className="px-6 py-3 font-semibold whitespace-nowrap">Referral</th>
                         <th className="px-6 py-3 font-semibold whitespace-nowrap">High School</th>
-                        <th className="px-6 py-3 font-semibold whitespace-nowrap">Modules</th>
                         <th className="px-6 py-3 font-semibold whitespace-nowrap">Status</th>
                         <th className="px-6 py-3 font-semibold whitespace-nowrap">Registered</th>
                       </tr>
@@ -423,10 +238,6 @@ export default function Admin() {
                               )}
                             </td>
                             <td className="px-6 py-3.5 whitespace-nowrap">
-                              <span className="text-gray-700 font-semibold">{(u.purchases || []).length}</span>
-                              <span className="text-xs text-gray-400 ml-1">module{(u.purchases || []).length !== 1 ? 's' : ''}</span>
-                            </td>
-                            <td className="px-6 py-3.5 whitespace-nowrap">
                               {u.isAdmin ? (
                                 <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: '#fef3c7', color: '#92400e' }}>Admin</span>
                               ) : isLive ? (
@@ -483,3 +294,4 @@ function StatCard({ icon: Icon, label, value, sub, gradient, light = false, bord
     </motion.div>
   )
 }
+
