@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, useInView, useScroll, useTransform } from 'framer-motion'
 import {
   ArrowRight, ShoppingCart, Users, Video, Trophy, Layers,
-  CheckCircle2, ChevronRight, Linkedin, Twitter,
+  CheckCircle2, ChevronRight, Linkedin, Instagram,
   Zap, Target, Award, GraduationCap, Sparkles,
   RefreshCw, XCircle, MessageCircle, BookOpen,
 } from 'lucide-react'
@@ -207,9 +207,16 @@ function FounderHero({ founder }) {
         </div>
 
         <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
-          <a href={founder.linkedin} className="text-gray-400 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-blue-50">
-            <Linkedin className="w-4 h-4" />
-          </a>
+          {founder.linkedin && (
+            <a href={founder.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-400 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-blue-50">
+              <Linkedin className="w-4 h-4" />
+            </a>
+          )}
+          {founder.instagram && (
+            <a href={founder.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-blue-50">
+              <Instagram className="w-4 h-4" />
+            </a>
+          )}
           <Link to="/team" className="ml-auto text-xs font-semibold text-primary flex items-center gap-1 hover:gap-2 transition-all">
             Read more <ArrowRight className="w-3 h-3" />
           </Link>

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   Linkedin, BookOpen, ArrowRight, Star, Award,
-  GraduationCap, Palette, Users, Code2, Share2,
+  GraduationCap, Palette, Users, Code2, Share2, Instagram,
 } from 'lucide-react'
 import Avatar from '../components/Avatar'
 import { FOUNDERS, TEAM } from '../data/constants'
@@ -87,9 +87,16 @@ function FounderCard({ founder }) {
         </div>
 
         <div className="flex items-center gap-2 pt-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <a href={founder.linkedin} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/5">
-            <Linkedin className="w-3.5 h-3.5" /> LinkedIn
-          </a>
+          {founder.linkedin && (
+            <a href={founder.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/5">
+              <Linkedin className="w-3.5 h-3.5" /> LinkedIn
+            </a>
+          )}
+          {founder.instagram && (
+            <a href={founder.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/5">
+              <Instagram className="w-3.5 h-3.5" /> Instagram
+            </a>
+          )}
           <Link to="/store" className="ml-auto text-xs font-semibold text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
             See Modules <ArrowRight className="w-3 h-3" />
           </Link>
