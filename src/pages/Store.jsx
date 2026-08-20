@@ -1067,9 +1067,12 @@ export default function Store() {
                   ) : bundles.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {[...bundles].sort((a, b) => {
-                          const FEATURED_BUNDLE_ID = 'd1000000-0000-0000-0000-00000000000b'
-                          const aF = a.id === FEATURED_BUNDLE_ID ? -1 : 0
-                          const bF = b.id === FEATURED_BUNDLE_ID ? -1 : 0
+                          const FEATURED_IDS = new Set([
+                            'd1000000-0000-0000-0000-00000000000b', // Eng IFP Sem 1 (Whole Modules)
+                            'd1000000-0000-0000-0000-000000000005', // Pharma Sem 1 (Whole Modules)
+                          ])
+                          const aF = FEATURED_IDS.has(a.id) ? -1 : 0
+                          const bF = FEATURED_IDS.has(b.id) ? -1 : 0
                           return aF - bF
                         }).map(bundle => {
                         const components = bundle.bundle_components || []
@@ -1101,12 +1104,15 @@ export default function Store() {
                         const savingsEgp = listPrice > realPrice ? listPrice - realPrice : 0
                         const discountPct = listPrice > 0 && savingsEgp > 0 ? Math.round((savingsEgp / listPrice) * 100) : 0
 
-                        // ── Featured bundle → hero card ──
+                        // ── Featured bundles → hero card ──
                         // Matched by stable UUID — immune to title edits in Supabase.
-                        // DB: "Eng IFP Semester 1 Bundle: Math 1 + Science 1 (Whole Modules)"
-                        const FEATURED_BUNDLE_ID = 'd1000000-0000-0000-0000-00000000000b'
-                        const isFeatured = bundle.id === FEATURED_BUNDLE_ID
-                        console.log('[FeaturedBundle] id:', bundle.id, '| isFeatured:', isFeatured)
+                        // d1000000-...000b = Eng IFP Semester 1 Bundle: Math 1 + Science 1 (Whole Modules)
+                        // d1000000-...0005 = Pharma Semester 1 Bundle: Chemistry 1 + Biology 1 (Whole Modules)
+                        const FEATURED_IDS = new Set([
+                          'd1000000-0000-0000-0000-00000000000b',
+                          'd1000000-0000-0000-0000-000000000005',
+                        ])
+                        const isFeatured = FEATURED_IDS.has(bundle.id)
                         if (isFeatured) {
                           return (
                             <FeaturedBundleCard
