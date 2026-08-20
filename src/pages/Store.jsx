@@ -4,7 +4,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion'
 import {
   CheckCircle2, Search, ArrowRight, ArrowLeft,
   BookOpen, GraduationCap,
-  Layers, X, ChevronRight, Package, Tag, ShoppingCart, EyeOff,
+  Layers, X, ChevronRight, Package, Tag, ShoppingCart, EyeOff, Flame,
 } from 'lucide-react'
 
 import { supabase } from '../lib/supabase'
@@ -216,6 +216,230 @@ function ModuleCard({ course, university }) {
         </div>
       </div>
     </motion.div>
+  )
+}
+
+/* ─── Featured Bundle Hero Card ─────────────────
+   Only rendered when bundle.is_featured === true.
+   Every other bundle uses the plain card below.
+   ──────────────────────────────────────────────── */
+function FeaturedBundleCard({ bundle, componentsList, buyFormUrl, listPrice, realPrice, savingsEgp, discountPct }) {
+  return (
+    <div
+      style={{
+        transform: 'scale(1.04)',
+        transformOrigin: 'center',
+        zIndex: 10,
+        position: 'relative',
+      }}
+    >
+      {/* Outer glow ring */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: '-3px',
+          borderRadius: '20px',
+          background: 'linear-gradient(135deg, #f0a500, #d97706, #fbbf24, #f0a500)',
+          backgroundSize: '300% 300%',
+          animation: 'shimmer 3s linear infinite',
+          zIndex: 0,
+        }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          borderRadius: '16px',
+          position: 'relative',
+          zIndex: 1,
+          overflow: 'hidden',
+          background: 'linear-gradient(160deg, #fffbeb 0%, #ffffff 60%, #fff7ed 100%)',
+          boxShadow: '0 8px 40px rgba(240,165,0,0.28), 0 2px 8px rgba(0,0,0,0.08)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '1.5rem',
+          minHeight: '220px',
+        }}
+      >
+        {/* Subtle shimmer overlay on card */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(105deg, transparent 40%, rgba(255,200,50,0.08) 50%, transparent 60%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 2.8s linear infinite',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+
+        {/* Decorative corner burst */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '112px',
+            height: '112px',
+            borderBottomLeftRadius: '9999px',
+            background: 'linear-gradient(135deg, rgba(251,191,36,0.35), rgba(240,165,0,0.15))',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+
+        {/* ── Angled "Best Offer" ribbon (top-left) ── */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '18px',
+            left: '-38px',
+            width: '148px',
+            transform: 'rotate(-45deg)',
+            background: 'linear-gradient(90deg, #d97706, #f0a500)',
+            color: '#fff',
+            textAlign: 'center',
+            fontSize: '10px',
+            fontWeight: 800,
+            letterSpacing: '0.03em',
+            padding: '5px 0',
+            boxShadow: '0 2px 8px rgba(240,165,0,0.45)',
+            zIndex: 20,
+            pointerEvents: 'none',
+            lineHeight: 1.2,
+          }}
+        >
+          <motion.span
+            animate={{ scale: [1, 1.06, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+          >
+            🔥 Best Offer
+          </motion.span>
+        </div>
+
+        {/* ── Card content (z-10 so it sits above overlays) ── */}
+        <div style={{ position: 'relative', zIndex: 10, marginBottom: '1.25rem' }}>
+          {/* Badge row — single consolidated pill */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap', paddingLeft: '4px' }}>
+            <motion.span
+              animate={{ boxShadow: ['0 0 0 0 rgba(240,165,0,0.5)', '0 0 0 6px rgba(240,165,0,0)', '0 0 0 0 rgba(240,165,0,0)'] }}
+              transition={{ duration: 2.2, repeat: Infinity }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 12px',
+                borderRadius: '9999px',
+                background: 'linear-gradient(135deg, #f0a500, #d97706)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: '11px',
+                boxShadow: '0 2px 10px rgba(240,165,0,0.4)',
+              }}
+            >
+              <Flame style={{ width: '12px', height: '12px' }} />
+              Best Value{discountPct > 0 ? ` — Save ${discountPct}%` : ''}
+            </motion.span>
+          </div>
+
+          <h3
+            style={{
+              fontSize: '1.125rem',
+              fontWeight: 700,
+              color: '#111827',
+              marginBottom: '8px',
+              fontFamily: 'Playfair Display, serif',
+              lineHeight: 1.3,
+            }}
+          >
+            {bundle.name}
+          </h3>
+          <p style={{ fontSize: '12px', color: '#6b7280', lineHeight: 1.6 }}>
+            <span style={{ fontWeight: 600, color: '#374151' }}>Includes:</span>{' '}
+            {componentsList || 'Full module access'}
+          </p>
+        </div>
+
+        {/* ── Price + CTA ── */}
+        <div
+          style={{
+            borderTop: '1px solid rgba(240,165,0,0.2)',
+            paddingTop: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+          <div>
+            {listPrice > realPrice && (
+              <p style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'line-through', fontWeight: 500, lineHeight: 1, marginBottom: '2px' }}>
+                {listPrice.toLocaleString()} EGP
+              </p>
+            )}
+            <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
+              {realPrice.toLocaleString()}
+            </p>
+            <p style={{ fontSize: '10px', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <Tag style={{ width: '10px', height: '10px' }} /> EGP
+            </p>
+          </div>
+
+          {buyFormUrl ? (
+            <motion.a
+              href={buyFormUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: 700,
+                color: '#fff',
+                background: 'linear-gradient(135deg, #f0a500, #d97706)',
+                boxShadow: '0 4px 16px rgba(240,165,0,0.45)',
+                textDecoration: 'none',
+                flexShrink: 0,
+              }}
+            >
+              <ShoppingCart style={{ width: '16px', height: '16px' }} /> Buy This Bundle
+            </motion.a>
+          ) : (
+            <button
+              disabled
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: 600,
+                background: '#e5e7eb',
+                color: '#9ca3af',
+                cursor: 'not-allowed',
+                opacity: 0.6,
+                flexShrink: 0,
+              }}
+            >
+              <ShoppingCart style={{ width: '16px', height: '16px' }} /> Coming soon
+            </button>
+          )}
+        </div>
+      </motion.div>
+    </div>
   )
 }
 
@@ -842,7 +1066,12 @@ export default function Store() {
                     </div>
                   ) : bundles.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {bundles.map(bundle => {
+                      {[...bundles].sort((a, b) => {
+                          const FEATURED_BUNDLE_ID = 'd1000000-0000-0000-0000-00000000000b'
+                          const aF = a.id === FEATURED_BUNDLE_ID ? -1 : 0
+                          const bF = b.id === FEATURED_BUNDLE_ID ? -1 : 0
+                          return aF - bF
+                        }).map(bundle => {
                         const components = bundle.bundle_components || []
                         const componentsList = components
                           .map(comp => {
@@ -872,6 +1101,28 @@ export default function Store() {
                         const savingsEgp = listPrice > realPrice ? listPrice - realPrice : 0
                         const discountPct = listPrice > 0 && savingsEgp > 0 ? Math.round((savingsEgp / listPrice) * 100) : 0
 
+                        // ── Featured bundle → hero card ──
+                        // Matched by stable UUID — immune to title edits in Supabase.
+                        // DB: "Eng IFP Semester 1 Bundle: Math 1 + Science 1 (Whole Modules)"
+                        const FEATURED_BUNDLE_ID = 'd1000000-0000-0000-0000-00000000000b'
+                        const isFeatured = bundle.id === FEATURED_BUNDLE_ID
+                        console.log('[FeaturedBundle] id:', bundle.id, '| isFeatured:', isFeatured)
+                        if (isFeatured) {
+                          return (
+                            <FeaturedBundleCard
+                              key={bundle.id}
+                              bundle={bundle}
+                              componentsList={componentsList}
+                              buyFormUrl={buyFormUrl}
+                              listPrice={listPrice}
+                              realPrice={realPrice}
+                              savingsEgp={savingsEgp}
+                              discountPct={discountPct}
+                            />
+                          )
+                        }
+
+                        // ── Regular bundle → plain card (unchanged) ──
                         return (
                           <div
                             key={bundle.id}

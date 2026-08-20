@@ -550,7 +550,7 @@ export default function Home() {
                     <p className="text-white/70 text-sm">University Revision Specialists</p>
                     <div className="mt-6 grid grid-cols-2 gap-3">
                       {[
-                        { label: 'Founded', value: '2023' },
+                        { label: 'Founded', value: '2025' },
                         { label: 'Founders', value: '1' },
                         { label: 'University', value: '1' },
                         { label: 'Rating', value: '4.9 ★' },
