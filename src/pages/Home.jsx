@@ -11,7 +11,6 @@ import AnimatedCounter from '../components/AnimatedCounter'
 import Avatar from '../components/Avatar'
 import ParallaxBackground from '../components/ParallaxBackground'
 import WhatsAppTutorButton from '../components/WhatsAppTutorButton'
-import TrollOverlay from '../components/TrollOverlay'
 import { FOUNDERS, STATS, UH_SUBJECTS } from '../data/constants'
 import { useCatalog } from '../hooks/useCatalog'
 
@@ -237,7 +236,6 @@ export default function Home() {
 
   return (
     <div className="relative">
-      <TrollOverlay />
       <ParallaxBackground />
 
       <div className="relative" style={{ zIndex: 1 }}>
