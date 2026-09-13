@@ -114,7 +114,7 @@ export const COURSES = [
     features: [],
     topics: [],
     badge: null,
-    instructors: [{ id: 'ins-12', name: 'Mohra Ehab', initials: 'ME' }],
+    instructors: [{ id: 'ins-19', name: 'Mohamed Adham Hussein', initials: 'MA' }],
   },
   {
     id: 'uh-eng-sci1-ifp',
@@ -133,7 +133,7 @@ export const COURSES = [
     features: [],
     topics: [],
     badge: null,
-    instructors: [{ id: 'ins-7', name: 'Judy Ayman', initials: 'JA' }],
+    instructors: [{ id: 'ins-18', name: 'Jana Abdelfatah', initials: 'JA' }],
   },
   {
     id: 'uh-eng-aes-ifp',
@@ -171,7 +171,7 @@ export const COURSES = [
     features: [],
     topics: [],
     badge: null,
-    instructors: [{ id: 'ins-12', name: 'Mohra Ehab', initials: 'ME' }],
+    instructors: [{ id: 'ins-19', name: 'Mohamed Adham Hussein', initials: 'MA' }],
   },
   {
     id: 'uh-eng-sci2-ifp',
@@ -190,7 +190,7 @@ export const COURSES = [
     features: [],
     topics: [],
     badge: null,
-    instructors: [{ id: 'ins-7', name: 'Judy Ayman', initials: 'JA' }],
+    instructors: [{ id: 'ins-18', name: 'Jana Abdelfatah', initials: 'JA' }],
   },
   {
     id: 'uh-pharma-chem1-ifp',
@@ -512,22 +512,10 @@ export const TEAM = [
 ]
 
 /* ────────────────────────────────────────────────
-   5️⃣  INSTRUCTORS — 5 UH instructors (ins-7–11).
+   5️⃣  INSTRUCTORS — UH instructors.
        Photo files go at  public/instructors/<id>.jpg
    ──────────────────────────────────────────────── */
 export const INSTRUCTORS = [
-  {
-    id: 'ins-7',
-    name: 'Judy Ayman',
-    role: 'Physics Instructor',
-    subject: 'Physics',
-    photo: '/instructors/ins-7.jpg',
-    initials: 'JA',
-    gradientFrom: '#0047AB', gradientTo: '#003380',
-    universities: ['UH'],
-    rating: 4.9, students: 0,
-    bio: 'Physics specialist dedicated to making UH Physics exams straightforward and achievable.',
-  },
   {
     id: 'ins-8',
     name: 'Ahmed Essam El-Din',
@@ -647,6 +635,30 @@ export const INSTRUCTORS = [
     universities: ['UH'],
     rating: null, students: null,
     bio: "Mechatronics Engineering student with hands-on experience in manufacturing, CAD/CATIA design, and hardware prototyping. I believe engineering is best learned by building — turning technical concepts into hands-on, buildable steps students can apply for themselves.",
+  },
+  {
+    id: 'ins-18',
+    name: 'Jana Abdelfatah',
+    role: 'Physics & Computer Science Instructor',
+    subject: 'Engineering Science',
+    photo: null,
+    initials: 'JA',
+    gradientFrom: '#0047AB', gradientTo: '#003380',
+    universities: ['UH'],
+    rating: null, students: null,
+    bio: "Electrical & Electronics Engineering student who teaches by connecting theory to real-world applications and hands-on problem-solving. Her goal: every student leaves each session more confident, capable, and curious than when they started.",
+  },
+  {
+    id: 'ins-19',
+    name: 'Mohamed Adham Hussein',
+    role: 'Mathematics Instructor',
+    subject: 'Engineering Mathematics',
+    photo: null,
+    initials: 'MA',
+    gradientFrom: '#003F87', gradientTo: '#0047AB',
+    universities: ['UH'],
+    rating: null, students: null,
+    bio: "Ambitious Electrical and Electronic Engineering student passionate about pure mathematics, semiconductor physics, and quantum hardware engineering, with research experience across IoT structural monitoring, sustainable materials, and renewable energy systems.",
   },
 ]
 

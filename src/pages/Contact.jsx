@@ -28,13 +28,14 @@ const FAQS = [
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' })
-  const [error, setError] = useState('')
-  const [sent, setSent]   = useState(false)
+  const [error, setError]     = useState('')
+  const [sent, setSent]       = useState(false)
+  const [sending, setSending] = useState(false)
   const [openFaq, setOpenFaq] = useState(0)
 
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setError('') }
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       setError('Please fill in your name, email, and message.')
@@ -44,8 +45,37 @@ export default function Contact() {
       setError('Please enter a valid email.')
       return
     }
-    /* In production: POST this to your backend / serverless function. */
-    setSent(true)
+
+    setSending(true)
+    setError('')
+    try {
+      const endpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT
+      const body = {
+        name:    form.name,
+        email:   form.email,
+        message: form.message,
+        ...(form.phone   ? { phone:   form.phone }   : {}),
+        ...(form.subject ? { subject: form.subject } : {}),
+      }
+      const res = await fetch(endpoint, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body:    JSON.stringify(body),
+      })
+      if (res.ok) {
+        setSent(true)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(
+          data?.errors?.[0]?.message ||
+          'Something went wrong sending your message — please try WhatsApp or email us directly instead.'
+        )
+      }
+    } catch {
+      setError('Something went wrong sending your message — please try WhatsApp or email us directly instead.')
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -120,7 +150,7 @@ export default function Contact() {
                 </h3>
                 <p className="text-sm text-gray-500 mb-5">We'll get back to you at <strong>{form.email}</strong>.</p>
                 <button
-                  onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
+                  onClick={() => { setSent(false); setSending(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
                   className="text-sm text-primary font-semibold hover:underline"
                 >
                   Send another message
@@ -168,8 +198,22 @@ export default function Contact() {
                   </div>
                 )}
 
-                <button type="submit" className="btn-primary justify-center mt-2">
-                  <Send className="w-4 h-4" /> Send message
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="btn-primary justify-center mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {sending ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                      Sending…
+                    </>
+                  ) : (
+                    <><Send className="w-4 h-4" /> Send message</>
+                  )}
                 </button>
               </form>
             )}

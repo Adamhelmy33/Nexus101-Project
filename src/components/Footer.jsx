@@ -13,7 +13,6 @@ const FOOTER_LINKS = {
     { label: 'Engineering (IFP)',       to: '/store/uh/engineering/ifp' },
     { label: 'Engineering (Level 4)',   to: '/store/uh/engineering/level-4' },
     { label: 'Physiotherapy (IFP)',     to: '/store/uh/physiotherapy/ifp' },
-    { label: 'Physiotherapy (Level 4)', to: '/store/uh/physiotherapy/level-4' },
     { label: 'Pharmacy (IFP)',          to: '/store/uh/pharmacy/ifp' },
   ],
   Support: [
