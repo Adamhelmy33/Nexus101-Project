@@ -486,7 +486,7 @@ export default function Home() {
                   Learn from <span className="gradient-text">expert tutors</span>
                 </h2>
                 <p className="text-gray-500 text-lg max-w-xl mx-auto">
-                  Ten specialists. Each obsessed with one thing: getting you a passing grade.
+                  Eleven specialists. Each obsessed with one thing: getting you a passing grade.
                 </p>
               </motion.div>
 

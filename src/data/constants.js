@@ -152,7 +152,7 @@ export const COURSES = [
     features: [],
     topics: [],
     badge: null,
-    instructors: [{ id: 'ins-12', name: 'Mohra Ehab', initials: 'ME' }],
+    instructors: [{ id: 'ins-18', name: 'Jana Abdelfatah', initials: 'JA' }],
   },
   {
     id: 'uh-eng-math2-ifp',
@@ -285,7 +285,7 @@ export const COURSES = [
     features: [],
     topics: [],
     badge: null,
-    instructors: [{ id: 'ins-8', name: 'Ahmed Essam El-Din', initials: 'AE' }],
+    instructors: [{ id: 'ins-20', name: 'Mohamed Farag', initials: 'MF' }],
   },
   {
     id: 'uh-eng-digital-electronics-l4',
@@ -517,18 +517,6 @@ export const TEAM = [
    ──────────────────────────────────────────────── */
 export const INSTRUCTORS = [
   {
-    id: 'ins-8',
-    name: 'Ahmed Essam El-Din',
-    role: 'Mathematics Instructor',
-    subject: 'Engineering Mathematics',
-    photo: null,
-    initials: 'AE',
-    gradientFrom: '#003F87', gradientTo: '#0047AB',
-    universities: ['UH'],
-    rating: null, students: null,
-    bio: 'Mechatronics Engineering student at the University of Hertfordshire, national gold medalist in mathematics, and experienced coding instructor with a 90% student completion rate.',
-  },
-  {
     id: 'ins-9',
     name: 'Youssif Ahmed Saqr',
     role: 'Digital Electronics & Programming Instructor',
@@ -563,18 +551,6 @@ export const INSTRUCTORS = [
     universities: ['UH'],
     rating: 4.9, students: 0,
     bio: 'Mechanical engineering expert who breaks down design principles into exam-ready clarity.',
-  },
-  {
-    id: 'ins-12',
-    name: 'Mohra Ehab',
-    role: 'Physics Instructor',
-    subject: 'Physics',
-    photo: null,
-    initials: 'ME',
-    gradientFrom: '#0047AB', gradientTo: '#003380',
-    universities: ['UH'],
-    rating: null, students: null,
-    bio: "Empowering students to master Physics by understanding the 'why' behind every concept. IFP graduate now studying Electrical & Electronic Engineering at the University of Hertfordshire, with hands-on experience in IoT, embedded systems, and sustainable engineering projects.",
   },
   {
     id: 'ins-13',
@@ -659,6 +635,18 @@ export const INSTRUCTORS = [
     universities: ['UH'],
     rating: null, students: null,
     bio: "Ambitious Electrical and Electronic Engineering student passionate about pure mathematics, semiconductor physics, and quantum hardware engineering, with research experience across IoT structural monitoring, sustainable materials, and renewable energy systems.",
+  },
+  {
+    id: 'ins-20',
+    name: 'Mohamed Farag',
+    role: 'Mathematics Instructor',
+    subject: 'Engineering Mathematics (Level 4)',
+    photo: null,
+    initials: 'MF',
+    gradientFrom: '#003F87', gradientTo: '#0047AB',
+    universities: ['UH'],
+    rating: null, students: null,
+    bio: 'Ex-Co-founder of Nexus 101 and Ex-Chairman of IEEE UH-GAF. Taught Mathematics to IFP and UH-GAF Engineering Schools.',
   },
 ]
 
