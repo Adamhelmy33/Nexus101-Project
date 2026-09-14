@@ -196,57 +196,59 @@ export default function CourseDetail() {
           )}
         </AnimatePresence>
 
-        {/* ── Free Revision card ── */}
-        <motion.div variants={fadeUp} initial="hidden" animate="show" className="mb-6">
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-            <div className="flex items-center gap-5 p-6">
-              {/* Icon */}
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 select-none"
-                style={{ background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)' }}
-              >
-                🎬
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <p className="font-bold text-gray-900 text-base">Free Revision Session</p>
-                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-full bg-emerald-100 text-emerald-700">
-                    Free
-                  </span>
+        {/* ── Free Revision card — hidden entirely for Engineering Level 4 ── */}
+        {!(course.subject === 'engineering' && course.studyLevel === 'level-4') && (
+          <motion.div variants={fadeUp} initial="hidden" animate="show" className="mb-6">
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+              <div className="flex items-center gap-5 p-6">
+                {/* Icon */}
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 select-none"
+                  style={{ background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)' }}
+                >
+                  🎬
                 </div>
-                <p className="text-xs text-gray-400">Preview — watch before you buy</p>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="font-bold text-gray-900 text-base">Free Revision Session</p>
+                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-full bg-emerald-100 text-emerald-700">
+                      Free
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">Preview — watch before you buy</p>
+                </div>
+
+                {/* Action */}
+                <div className="flex-shrink-0">
+                  {freeRevisionUrl ? (
+                    <a
+                      href={freeRevisionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.04] shadow"
+                      style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)' }}
+                    >
+                      <PlayCircle className="w-4 h-4" /> Watch Free
+                    </a>
+                  ) : (
+                    <button
+                      disabled
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow opacity-50 cursor-not-allowed"
+                      style={{ background: '#e5e7eb', color: '#6b7280' }}
+                    >
+                      <PlayCircle className="w-4 h-4" /> Coming soon
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Action */}
-              <div className="flex-shrink-0">
-                {freeRevisionUrl ? (
-                  <a
-                    href={freeRevisionUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.04] shadow"
-                    style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)' }}
-                  >
-                    <PlayCircle className="w-4 h-4" /> Watch Free
-                  </a>
-                ) : (
-                  <button
-                    disabled
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow opacity-50 cursor-not-allowed"
-                    style={{ background: '#e5e7eb', color: '#6b7280' }}
-                  >
-                    <PlayCircle className="w-4 h-4" /> Coming soon
-                  </button>
-                )}
-              </div>
+              {/* Green accent bar */}
+              <div className="h-0.5" style={{ background: 'linear-gradient(90deg, #16a34a, #4ade80)' }} />
             </div>
-
-            {/* Green accent bar */}
-            <div className="h-0.5" style={{ background: 'linear-gradient(90deg, #16a34a, #4ade80)' }} />
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Item cards */}
         <div className="mb-3 flex items-center justify-between">
