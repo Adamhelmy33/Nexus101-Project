@@ -40,7 +40,7 @@ export default function CourseDetail() {
         .maybeSingle()
 
       if (courseErr || !courseRow) {
-        setItems([])
+        setItems(course?.items ?? [])
         setItemsLoading(false)
         return
       }
@@ -54,12 +54,12 @@ export default function CourseDetail() {
         .eq('published', true)
         .order('order_index')
 
-      setItems(error ? [] : (data ?? []))
+      setItems(error ? (course?.items ?? []) : (data ?? []))
       setItemsLoading(false)
     }
 
     fetchItems()
-  }, [courseId])
+  }, [courseId, course])
 
   /* ── Loading / not-found guards ── */
   if (catalogLoading || itemsLoading) {
