@@ -293,6 +293,11 @@ export const COURSES = [
     features: [],
     topics: [],
     badge: null,
+    bundlePrice: null,
+    items: [
+      { slug: 'test-1', title: 'ICT',        price_egp: 1200, order_index: 0 },
+      { slug: 'final',  title: 'Final Exam', price_egp: 2300, order_index: 1 },
+    ],
     instructors: [{ id: 'ins-20', name: 'Mohamed Farag', initials: 'MF' }],
   },
   {
